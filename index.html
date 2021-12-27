@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>The Social Cost of the Pandemic</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap"> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="titleContainer">
+        <div class="content">
+            <div class="FigTitleBig">
+                <span style="font-weight:900;">Work From Home</span> <br>
+                <div href="" id="FigTitle" class="typewrite" data-period="2000" data-type='[ "A <span class=\"rich\">rich<\/span> vs. <span class=\"poor\">poor<\/span> issue", "An <span class=\"rich\">urban<\/span> vs. <span class=\"poor\">rural<\/span> issue"]'>
+                    <span class="wrap"></span>
+                </div>
+                <!-- <div class="FigTitle">a <span class="rich">Rich</span> vs. <span class="poor">Poor</span> issue</div> -->
+            </div>
+            <br>
+            <div class="mapCredit">
+                by <a href='https://www.leonardonicoletti.com/' style='text-decoration:underline; color:black' target='_blank'><b>LEONARDO NICOLETTI</b></a>
+            </div>
+            <br>
+            <div class="FigSubtitle">This visualization illustrates the relationship between median household income and the intensity in travel to workplaces over the course of the COVID-19 pandemic. In this map, areas coloured in gold represent areas that are both high income and that experienced lower levels of travel to workplaces throughout the pandemic. Here, residents of these wealthier areas were able to successfully reduce their mobility and adopt a work-from-home lifestyle.  In contrast, areas coloured in purple represent areas that are both low income and that did not experience lower levels of travel to workplaces throughout the pandemic.  Residents of these poorer areas were not able to reduce their mobility as much, and they continued to commute to work. Finally, shades of brown represent (the few) local authorities that are both high income and that experienced higher levels of travel to workplaces throughout the pandemic.  Regardless of the wealthy status of these areas, residents continued to commute to work.
+            </div>
+            <br>
+            <div style="text-align:center" class="custom-select">
+                <span class="mapCredit">SELECT VIEW</span><br>
+                <select name="view" id="chartView">
+                    <option value="map">Map</option>
+                    <option value="chart">Scatter-plot</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="chart" style="text-align:center"></div>
+</body>
+<script src="https://d3js.org/d3.v6.js"></script>
+<script src="d3-hexjson.min.js"></script>
+<script src="index.js"></script>
