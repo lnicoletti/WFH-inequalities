@@ -22,19 +22,34 @@
                 by <a href='https://www.leonardonicoletti.com/' style='text-decoration:underline; color:black' target='_blank'><b>LEONARDO NICOLETTI</b></a>
             </div>
             <br>
-            <div class="FigSubtitle">This visualization illustrates the relationship between median household income and the intensity in travel to workplaces over the course of the COVID-19 pandemic. In this map, areas coloured in gold represent areas that are both high income and that experienced lower levels of travel to workplaces throughout the pandemic. Here, residents of these wealthier areas were able to successfully reduce their mobility and adopt a work-from-home lifestyle.  In contrast, areas coloured in purple represent areas that are both low income and that did not experience lower levels of travel to workplaces throughout the pandemic.  Residents of these poorer areas were not able to reduce their mobility as much, and they continued to commute to work. Finally, shades of brown represent (the few) local authorities that are both high income and that experienced higher levels of travel to workplaces throughout the pandemic.  Regardless of the wealthy status of these areas, residents continued to commute to work.
-            </div>
+            <br>
+            <br>
+            <details>
+                <summary class="mapCredit" style="opacity:0.6">What does this visualization show?</summary>
+            
+                <p class="FigSubtitle">This visualization illustrates the relationship between median household income and the intensity in travel to workplaces over the course of the COVID-19 pandemic. In this map, areas coloured in gold represent areas that are both high income and that experienced lower levels of travel to workplaces throughout the pandemic. Here, residents of these wealthier areas were able to successfully reduce their mobility and adopt a work-from-home lifestyle.  In contrast, areas coloured in purple represent areas that are both low income and that did not experience lower levels of travel to workplaces throughout the pandemic.  Residents of these poorer areas were not able to reduce their mobility as much, and they continued to commute to work. Finally, shades of brown represent (the few) local authorities that are both high income and that experienced higher levels of travel to workplaces throughout the pandemic.  Regardless of the wealthy status of these areas, residents continued to commute to work.</p>
+            </details>
+            <!-- <div class="FigSubtitle">This visualization illustrates the relationship between median household income and the intensity in travel to workplaces over the course of the COVID-19 pandemic. In this map, areas coloured in gold represent areas that are both high income and that experienced lower levels of travel to workplaces throughout the pandemic. Here, residents of these wealthier areas were able to successfully reduce their mobility and adopt a work-from-home lifestyle.  In contrast, areas coloured in purple represent areas that are both low income and that did not experience lower levels of travel to workplaces throughout the pandemic.  Residents of these poorer areas were not able to reduce their mobility as much, and they continued to commute to work. Finally, shades of brown represent (the few) local authorities that are both high income and that experienced higher levels of travel to workplaces throughout the pandemic.  Regardless of the wealthy status of these areas, residents continued to commute to work.
+            </div> -->
             <br>
             <div style="text-align:center" class="custom-select">
                 <span class="mapCredit">SELECT VIEW</span><br>
                 <select name="view" id="chartView">
                     <option value="map">Map</option>
                     <option value="chart">Scatter-plot</option>
+                    <option value="bars">Bars</option>
                 </select>
             </div>
         </div>
     </div>
-    <div id="chart" style="text-align:center"></div>
+    <div id="chart" style="text-align:center" class="svg-container"></div>
+    <div class="content">
+        <details>
+            <summary class="mapCredit" style="opacity:0.6">Learn more about how this visual was created</summary>
+        
+            <p class="FigSubtitle">This visualization was created using aggregated mobility data for the United Kingdom from <a href="https://www.google.com/covid19/mobility/?hl=en" target="__blank">Google's COVID-19 Community Mobility Reports</a>, and household income data from the <a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofresidencebylocalauthorityashetable8" target="__blank">Office for National Statistics</a> in the United Kingdom. Raw data was cleaned and processed with Javascript inside this <a href="https://observablehq.com/@lnicoletti/covid-19-and-mobility" target="__blank">Observable notebook</a>, as part of a larger study conducted for <a href="https://www.endersanalysis.com/" target="__blank">Enders Analysis</a>. The visualizations themselves were created using the <a>D3.js</a> Javascript framework and the <a href="https://github.com/olihawkins/d3-hexjson" target="__blank">d3-hexjson plugin</a> developed by <a href="https://olihawkins.com/" target="__blank">Oli Hawkins</a> and the Leeds <a href="https://open-innovations.org/about/" target="__blank">Open Innovations</a> team. All code used for this project can be found on <a href="https://github.com/lnicoletti/WFH-inequalities" target="__blank">Github</a>.</p>
+        </details>
+    </div>
 </body>
 <script src="https://d3js.org/d3.v6.js"></script>
 <script src="d3-hexjson.min.js"></script>
