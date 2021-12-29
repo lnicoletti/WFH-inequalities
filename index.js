@@ -2,19 +2,21 @@
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
-    d3.json("https://gist.githubusercontent.com/lnicoletti/cc113bec2c2d494fd28d028fc62e7f35/raw/281bce47439ed21f810c357572d0d6b954044331/ukUpd_tot_scot_g_NI.json")
+    d3.json("https://gist.githubusercontent.com/lnicoletti/cc113bec2c2d494fd28d028fc62e7f35/raw/281bce47439ed21f810c357572d0d6b954044331/ukUpd_tot_scot_g_NI.json"),
+    d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth")
     ]).then((datasets) => {
 
     let hex_la = datasets[0]
     let ukUpd_tot = datasets[1]
+    let ukUpd_time = datasets[2]
 
-    renderChart(hex_la, ukUpd_tot)
+    renderChart(hex_la, ukUpd_tot, ukUpd_time)
     // renderLegend()
     })
 
 
     new TypeIt("#FigTitle", {
-        speed: 120,
+        speed: 150,
         strings: [
           'A <span class="rich">Rich</span> vs. <span class="poor">Poor</span> issue',
           'An <span class="rich">urban</span> vs. <span class="poor">rural</span> issue',
@@ -82,11 +84,11 @@ Promise.all([
     //     document.body.appendChild(css);
     // };
 
-    function renderChart(hex_la, ukUpd_tot) {
+    function renderChart(hex_la, ukUpd_tot, ukUpd_time) {
 
         const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
 
-        const marginTop = 0
+        const marginTop = 5
         const marginBottom = 40
         const marginLeft = 100
         // const figScale = 2.1
@@ -96,6 +98,7 @@ Promise.all([
         const scatterWidth = figWidth-100
         const figHeight = 600
         const radius = 10//9.8
+        const radiusHover = radius*2
         const boundWidth = 4
         const fontSize = 6.5
         const yVar = "mobilityWork"
@@ -146,7 +149,7 @@ Promise.all([
               <marker id="arrow" markerHeight=10 markerWidth=10 refX=3 refY=3 orient=auto>
                 <path d="M0,0L6,3L0,6Z" />
               </marker>
-              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${k/2} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
+              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${radius} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
                 <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
           ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
               </circle>`)}
@@ -284,7 +287,7 @@ Promise.all([
               .attr("cx", function(hex) {return hex.x;})
           .attr("cy", function(hex) {return hex.y;})
           .attr("r", radius)
-              .attr("stroke", "white")
+              .attr("stroke", "#fffae7")
               .attr("stroke-width", "0.5")
           // .attr("fill", d => boroughIncMob.filter(c=>c.borough_abbr===d.n)[0] === undefined? "#ccc": 
           //                 colorScale(boroughIncMob.filter(c=>c.borough_abbr===d.n)[0][mapMetric]))
@@ -311,15 +314,15 @@ Promise.all([
 
                                         circles.filter(c=>c.key===d.key)
                                             .attr("stroke-width", "1.5")
-                                            .attr("r", radius*2)
+                                            .attr("r", radiusHover)
                                         
                                         annot.filter(c=>c.key===d.key)
                                         .attr("font-size", fontSize*2)
                                         .style("text-transform", "uppercase")
                                         .attr("font-weight", 700)
                                             // .raise()
-
-                                        console.log(d)
+                                        showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
+                                        console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
           })
           .on("mouseleave", function(event, d) { 
                                           d3.select(this)
@@ -331,6 +334,7 @@ Promise.all([
                                         .attr("font-size", fontSize)
                                         .style("text-transform", "capitalize")
                                         .attr("font-weight", 500)
+                                        hideTooltip()
                                             // .lower()
           })
       
@@ -371,12 +375,13 @@ Promise.all([
 
             circles.filter(c=>c.key===d.key)
                 .attr("stroke-width", "1.5")
-                .attr("r", radius*2)
+                .attr("r", radiusHover)
             
             annot.filter(c=>c.key===d.key)
             .attr("font-size", fontSize*2)
             .style("text-transform", "uppercase")
             .attr("font-weight", 700)
+            showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
                 // .raise()
             })
             .on("mouseleave", function(event, d) { 
@@ -427,8 +432,8 @@ Promise.all([
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
-            .attr("x", -100)
-            .attr("y", -100)
+            .attr("x", 200)
+            .attr("y", 200)
             .attr("opacity", 0)
       
             circles.filter(d=>d.category!=="#ccc")
@@ -520,15 +525,20 @@ Promise.all([
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
-            .attr("x", -100)
-            .attr("y", -100)
-            .attr("opacity", 0)
+           .attr("x", 200)
+           .attr("y", 500)
+           .attr("opacity", 0)
 
             circles.filter(d=>d.category!=="#ccc")//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
             .transition()
-           .duration(750)
-           .ease(d3.easeLinear)
+            .delay((d, i) => {
+            return i * Math.random() * 1.5;
+            })
+            .duration(800)
+        //     .transition()
+        //    .duration(750)
+        //    .ease(d3.easeLinear)
          //   .attr("transform", function(hex) {
                // 	return "translate(" + hex.x + "," + hex.y + ")";
                // })
@@ -574,9 +584,8 @@ Promise.all([
            annot.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
             .transition()
-           .duration(750)
-           .ease(d3.easeLinear)
-        
+            .duration(750)
+            .ease(d3.easeLinear)
             .attr("x", (d, i)=>
                                 numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
                                 scaleXCategory(d.category)+40:
@@ -610,11 +619,27 @@ Promise.all([
         })
     }
 
+    function showTooltip(data, dataTime, categoryLabels, categoriesX) {
+        console.log(data, dataTime)
+        d3.select("#staticTooltip")
+          .selectAll("html").remove()
+
+        d3.select("#staticTooltip")
+          .append("html")
+          .html(`During the COVID-19 Pandemic, residents of the <strong class="rich" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${data.n}</strong>, traveled to work <strong class="rich" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
+    }
+
+    function hideTooltip() {
+
+        d3.select("#staticTooltip")
+          .selectAll("html").remove()
+    }
+
     d3.selection.prototype.moveToFront = function() {
         return this.each(function(){
           this.parentNode.appendChild(this);
         });
-      };
+    };
 
       d3.selection.prototype.moveToBack = function() {
         return this.each(function() {
@@ -636,7 +661,7 @@ Promise.all([
         else {
             return false;
         }
-        }
+    }
 
     function wrap(text, wrapWidth, yAxisAdjustment = 0) {
         text.each(function() {
@@ -661,7 +686,7 @@ Promise.all([
             }
         });
         return 0;
-        }
+    }
 
     function renderLegend() {
 

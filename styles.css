@@ -12,6 +12,10 @@
     font-style: normal;
 }
 
+body {
+    background-color: #fffae7;
+}
+
 
 .legendTitle {
   font-family:'Lato', sans-serif;
@@ -233,13 +237,13 @@ font-family:'Lato', sans-serif;
   .rich {
     background-color:#cbb35c;
     font-weight:900;
-    color:white
+    color:#fffae7
   }
 
   .poor {
     background-color:#9c75b4;
     font-weight:900;
-    color:white
+    color:#fffae7
   }
 
   .custom-select {
@@ -249,14 +253,22 @@ font-family:'Lato', sans-serif;
   }
 
   #chartView {
-      background-color: rgb(172, 172, 172);
+      background-color: #fffae7;
       width: 120px;
       height:30px;
-      color:white;
-      font-weight:900;
-      border-color: rgb(172, 172, 172)
+      color:black;
+      font-weight:500;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-color: black
   }
 
   #chartView-selected {
     border-color: lightgrey
+  }
+
+  #staticTooltip {
+      height: 30px;
+      margin-top:10px;
+      font-family: 'Lato', sans-serif;
   }
