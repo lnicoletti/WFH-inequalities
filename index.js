@@ -2,7 +2,7 @@
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
-    d3.json("https://gist.githubusercontent.com/lnicoletti/ea975f97ccfec28619ed0ba71d598b4e/raw/6b74e733aadcbb70aee2a5f2939b954ddf2059b0/ukUpd_tot.json")
+    d3.json("https://gist.githubusercontent.com/lnicoletti/cc113bec2c2d494fd28d028fc62e7f35/raw/281bce47439ed21f810c357572d0d6b954044331/ukUpd_tot_scot_g_NI.json")
     ]).then((datasets) => {
 
     let hex_la = datasets[0]
@@ -16,8 +16,8 @@ Promise.all([
     new TypeIt("#FigTitle", {
         speed: 120,
         strings: [
-          'A <span class="rich">Rich</span> vs. <span class="poor">Poor</span> issue.',
-          'An <span class="rich">urban</span> vs. <span class="poor">rural</span> issue.',
+          'A <span class="rich">Rich</span> vs. <span class="poor">Poor</span> issue',
+          'An <span class="rich">urban</span> vs. <span class="poor">rural</span> issue',
         ],
         breakLines: false,
         loop: true,
@@ -200,9 +200,9 @@ Promise.all([
 
           console.log(clusterData)
         //   scales for dot clusters
-          const categoriesX = ["#c8b35a", "#9972af", "#c8ada0", "#976b82", "#cbb8d7", "#af8e53", "#e4d9ac", "#e8e8e8", "#804d36"] 
-          const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-                                    "Low Income, Mid. Travel", "High Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+          const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
+          const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
+                                    "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
           const scaleXCategory = d3.scaleBand().domain(categoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
           const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleY = d3.scaleLinear().domain([0, 85]).range([figHeight- margin.bottom, 0]); 
@@ -419,8 +419,8 @@ Promise.all([
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
-            .attr("cx", -100)
-            .attr("cy", -100)
+            .attr("cx", 200)
+            .attr("cy", 200)
             .attr("opacity", 0)
 
             annot.filter(d=>d.category==="#ccc")
@@ -512,9 +512,9 @@ Promise.all([
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
-            .attr("cx", -100)
-            .attr("cy", -100)
-            .attr("opacity", 0)
+           .attr("cx", 200)
+           .attr("cy", 500)
+           .attr("opacity", 0)
 
             annot.filter(d=>d.category==="#ccc")
             .transition()
