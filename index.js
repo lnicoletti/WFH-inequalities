@@ -147,9 +147,9 @@ Promise.all([
         //   ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0]["Rural Urban Classification 2011 (6 fold)"] === undefined ? null:        
         //   ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0]["Rural Urban Classification 2011 (6 fold)"],
                                                                             
-        }))//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
+        }))//.filter(d=>d.urbCategory!==null)//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
         
-        
+        console.log("urb",ukUrbRural)
         console.log(hexes)
         //   cluster data for dot clusters
         //   const clustered = hexes.map(d=>({...d, cluster: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
@@ -626,6 +626,15 @@ Promise.all([
     
                 // const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
                 // console.log(pctLH)
+
+                // const numZeros = d3.range(0, 400, 4)
+                // // console.log(numZeros)
+                // const numTwos = d3.range(1, 400, 4)
+                // // console.log(numTwos)
+                // const numThrees = d3.range(2, 400, 4)
+                // // console.log(numThrees)
+                // const numFours = d3.range(3, 400, 4)
+                
                 const numZeros = d3.range(0, 400, 4)
                 // console.log(numZeros)
                 const numTwos = d3.range(1, 400, 4)
@@ -634,14 +643,15 @@ Promise.all([
                 // console.log(numThrees)
                 const numFours = d3.range(3, 400, 4)
 
-                // const numZeros = d3.range(0, 100, 5)
+                // const numZeros = d3.range(0, 100, 6)
                 // // console.log(numZeros)
-                // const numTwos = d3.range(1, 100, 5)
+                // const numTwos = d3.range(1, 100, 6)
                 // // console.log(numTwos)
-                // const numThrees = d3.range(2, 100, 5)
+                // const numThrees = d3.range(2, 100, 6)
                 // // console.log(numThrees)
-                // const numFours = d3.range(3, 100, 5)
-                // const numFives = d3.range(4, 100, 5)
+                // const numFours = d3.range(3, 100, 6)
+                // const numFives = d3.range(4, 100, 6)
+                // const numSix = d3.range(5, 100, 6)
     
                 svg.selectAll(".AxisLAN").remove()
     
@@ -691,6 +701,8 @@ Promise.all([
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
 
                 // .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                //                     numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+100:
                 //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleXurbCategory(d.urbCategory)+80:
                 //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
@@ -702,15 +714,17 @@ Promise.all([
                 //                     scaleXurbCategory(d.urbCategory))
     
                 // .attr("cy", (d, i)=>
-                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
-                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
-                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3):
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4))
+                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5))
 
                .attr("r", radius)
                .attr("opacity", d=>d.income!==null?1:0)
