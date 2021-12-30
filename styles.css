@@ -246,6 +246,18 @@ font-family:'Lato', sans-serif;
     color:#fffae7
   }
 
+  .richHigh {
+    background-color:#804d36;
+    font-weight:900;
+    color:#fffae7
+  }
+
+  .poorLow {
+    background-color:#e8e8e8;
+    font-weight:900;
+    color:#fffae7
+  }
+
   .custom-select {
     position: relative;
     font-family: 'Lato', sans-serif;

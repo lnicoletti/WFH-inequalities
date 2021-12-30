@@ -2,15 +2,20 @@
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
-    d3.json("https://gist.githubusercontent.com/lnicoletti/cc113bec2c2d494fd28d028fc62e7f35/raw/281bce47439ed21f810c357572d0d6b954044331/ukUpd_tot_scot_g_NI.json"),
-    d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth")
+    d3.json("https://gist.githubusercontent.com/lnicoletti/9be9db8307920b88fe71d5ec304e0fa3/raw/64881a3e2e97ef5cb15c6768e4b401c8018ec39a/ukUpd_tot_final.json"),
+    d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth"),
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/6800cd1df1205c0260f685fd83399cef/raw/e3a7d34515f4f96a8d5b4794d6cdc878f3f7b1f8/ukUrbRural_simple.csv", d3.autoType),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
+
     ]).then((datasets) => {
 
     let hex_la = datasets[0]
     let ukUpd_tot = datasets[1]
     let ukUpd_time = datasets[2]
+    let ukUrbRural = datasets[3]
 
-    renderChart(hex_la, ukUpd_tot, ukUpd_time)
+    renderChart(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
     // renderLegend()
     })
 
@@ -27,64 +32,7 @@ Promise.all([
       }).go();
 
 
-    // var TxtType = function(el, toRotate, period) {
-    //     this.toRotate = toRotate;
-    //     this.el = el;
-    //     this.loopNum = 0;
-    //     this.period = parseInt(period, 10) || 2000;
-    //     this.txt = '';
-    //     this.tick();
-    //     this.isDeleting = false;
-    // };
-
-    // TxtType.prototype.tick = function() {
-    //     var i = this.loopNum % this.toRotate.length;
-    //     var fullTxt = this.toRotate[i];
-    //     // console.log(fullTxt.split(" "))
-    //     if (this.isDeleting) {
-    //     this.txt = fullTxt.substring(0, this.txt.length - 1);
-    //     } else {
-    //     this.txt = fullTxt.substring(0, this.txt.length + 1);
-    //     }
-    //     // console.log(this.txt)
-    //     this.el.innerHTML = '<span class="wrap">'+this.txt+'</span>';
-        
-    //     var that = this;
-    //     var delta = 200 - Math.random() * 100;
-
-    //     if (this.isDeleting) { delta /= 2; }
-
-    //     if (!this.isDeleting && this.txt === fullTxt) {
-    //     delta = this.period;
-    //     this.isDeleting = true;
-    //     } else if (this.isDeleting && this.txt === '') {
-    //     this.isDeleting = false;
-    //     this.loopNum++;
-    //     delta = 500;
-    //     }
-
-    //     setTimeout(function() {
-    //     that.tick();
-    //     }, delta);
-    // };
-
-    // window.onload = function() {
-    //     var elements = document.getElementsByClassName('typewrite');
-    //     for (var i=0; i<elements.length; i++) {
-    //         var toRotate = elements[i].getAttribute('data-type');
-    //         var period = elements[i].getAttribute('data-period');
-    //         if (toRotate) {
-    //           new TxtType(elements[i], JSON.parse(toRotate), period);
-    //         }
-    //     }
-    //     // INJECT CSS
-    //     var css = document.createElement("style");
-    //     css.type = "text/css";
-    //     css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
-    //     document.body.appendChild(css);
-    // };
-
-    function renderChart(hex_la, ukUpd_tot, ukUpd_time) {
+    function renderChart(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural) {
 
         const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
 
@@ -140,7 +88,7 @@ Promise.all([
           }
         
         legendIndex = () => {
-            const k = 70/n;
+            const k = 63/n;
             // const arrow = 1;
             //font-family=sans-serif
             // <g transform="translate(-${k * n / 2},-${k * n / 2}) rotate(-45 ${k * n / 2},${k * n / 2})">
@@ -182,11 +130,27 @@ Promise.all([
           category: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
           ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
           ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
-          colorBivar([ukUpd_tot.filter(c=>c.area_code===d.key)[0]["workplaces_percent_change_from_baseline"], ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"]]) 
-                                                                            }))//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
-        
-        
+          colorBivar([ukUpd_tot.filter(c=>c.area_code===d.key)[0]["workplaces_percent_change_from_baseline"],ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"]]),
 
+          urbCategory: ukUrbRural.filter(c=>c.LAD11CD===d.key)[0] === undefined ? null: 
+          ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"] === null? null:
+          ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"] === undefined ? null:        
+          ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"],
+          
+        //   urbCategory: ukUrbRural.filter(c=>c.LAD11CD===d.key)[0] === undefined ? "No Data": 
+        //   ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"] === null? "No Data":
+        //   ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"] === undefined ? "No Data":        
+        //   ukUrbRural.filter(c=>c.LAD11CD===d.key)[0]["RUC11"],
+
+        //   urbCategory: ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0] === undefined ? null: 
+        //   ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0]["Rural Urban Classification 2011 (6 fold)"] === null? null:
+        //   ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0]["Rural Urban Classification 2011 (6 fold)"] === undefined ? null:        
+        //   ukUrbRural.filter(c=>c["LAD11CD"]===d.key)[0]["Rural Urban Classification 2011 (6 fold)"],
+                                                                            
+        }))//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
+        
+        
+        console.log(hexes)
         //   cluster data for dot clusters
         //   const clustered = hexes.map(d=>({...d, cluster: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
         //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
@@ -198,17 +162,38 @@ Promise.all([
 
         //   const clusterData = [hexes.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i})),
         //                        d3.rollups(hexes, v => v.length, d=>d.category).map(d=> { return {category: d[0], category_value: d[1]}}).filter(d=>d.category!=="#ccc")]
-
+        
+        //   variables for dot clusters bars
           const clusterData = d3.groups(hexes, v=>v.category).map(d=> { return {category: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}}).filter(d=>d.category!=="#ccc")
 
           console.log(clusterData)
-        //   scales for dot clusters
           const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
           const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
                                     "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
           const scaleXCategory = d3.scaleBand().domain(categoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
           const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleY = d3.scaleLinear().domain([0, 85]).range([figHeight- margin.bottom, 0]); 
+
+          //   variables for dot clusters bars urban rural
+          const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
+        // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
+
+        //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
+
+          console.log(ruralData)
+        //   console.log("ruralRaw", ukUrbRural)
+          const urbCategoriesX = ruralData.sort((a,b)=>b.data.length-a.data.length).map(d=>d.urbCategory)
+        //   urbCategoriesX.push("No Data")
+        //   console.log(urbCategoriesX)
+        //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
+        //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+          const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
+        //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
+          const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
+        // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
+
+          
+          
         //   ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<rect width=${k} height=${k} x=${i * k} y=${(n - 1 - j) * k} fill=${colors[j * n + i]}>
         //         <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
         //   ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
@@ -259,6 +244,21 @@ Promise.all([
         const xAxisBars = g => g
         .attr("transform", `translate(0,${figHeight - margin.bottom})`)
         .call(d3.axisBottom(scaleXCategoryLabels))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
+            .attr("x", scatterWidth)
+        //   .attr("x", scatterWidth - margin.right)
+            .attr("y", 30)
+            .attr("fill", "#000")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "end")
+            .attr("class", "legend")
+            .text(""))
+
+
+        const xAxisBarsUrb = g => g
+        .attr("transform", `translate(0,${figHeight - margin.bottom})`)
+        .call(d3.axisBottom(scaleXurbCategory))
         .call(g => g.select(".domain").remove())
         .call(g => g.append("text")
             .attr("x", scatterWidth)
@@ -322,7 +322,8 @@ Promise.all([
                                         .attr("font-weight", 700)
                                             // .raise()
                                         showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
-                                        console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
+                                        // console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
+                                        console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.LAD11CD===d.key)[0])
           })
           .on("mouseleave", function(event, d) { 
                                           d3.select(this)
@@ -504,6 +505,10 @@ Promise.all([
 
           } else if (view==="bars"){
 
+            // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
+
+            const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
+            console.log(pctLH)
             const numZeros = d3.range(0, 100, 3)
             // console.log(numZeros)
             const numTwos = d3.range(1, 100, 3)
@@ -615,12 +620,144 @@ Promise.all([
                   .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
               }, 0);
 
-          }
+            } else if (view==="barsUrban"){
+
+                // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
+    
+                // const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
+                // console.log(pctLH)
+                const numZeros = d3.range(0, 400, 4)
+                // console.log(numZeros)
+                const numTwos = d3.range(1, 400, 4)
+                // console.log(numTwos)
+                const numThrees = d3.range(2, 400, 4)
+                // console.log(numThrees)
+                const numFours = d3.range(3, 400, 4)
+
+                // const numZeros = d3.range(0, 100, 5)
+                // // console.log(numZeros)
+                // const numTwos = d3.range(1, 100, 5)
+                // // console.log(numTwos)
+                // const numThrees = d3.range(2, 100, 5)
+                // // console.log(numThrees)
+                // const numFours = d3.range(3, 100, 5)
+                // const numFives = d3.range(4, 100, 5)
+    
+                svg.selectAll(".AxisLAN").remove()
+    
+                circles.filter(d=>d.urbCategory===null)
+                .transition()
+               .duration(750)
+               .ease(d3.easeLinear)
+               .attr("cx", 200)
+               .attr("cy", 500)
+               .attr("opacity", 0)
+    
+                annot.filter(d=>d.urbCategory===null)
+                .transition()
+               .duration(750)
+               .ease(d3.easeLinear)
+               .attr("x", 200)
+               .attr("y", 500)
+               .attr("opacity", 0)
+    
+                circles.filter(d=>d.urbCategory!==null)//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+    
+                .transition()
+                .delay((d, i) => {
+                return i * Math.random() * 1.5;
+                })
+                .duration(800)
+            //     .transition()
+            //    .duration(750)
+            //    .ease(d3.easeLinear)
+
+                .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+60:
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+40:
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+20:
+                                    scaleXurbCategory(d.urbCategory))
+    
+                .attr("cy", (d, i)=>
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+
+                // .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+80:
+                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+60:
+                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+40:
+                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+20:
+                //                     scaleXurbCategory(d.urbCategory))
+    
+                // .attr("cy", (d, i)=>
+                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4))
+
+               .attr("r", radius)
+               .attr("opacity", d=>d.income!==null?1:0)
+    
+               annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+    
+                .transition()
+                .duration(750)
+                .ease(d3.easeLinear)
+                .attr("x", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+60:
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+40:
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+20:
+                                    scaleXurbCategory(d.urbCategory))
+    
+                .attr("y", (d, i)=>
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+
+                let barAxis = svg.append("g")
+                .call(xAxisBarsUrb)
+                .attr("class", "AxisLAN").attr("opacity", 0)
+                .transition()
+                .duration(1250)
+                .ease(d3.easeLinear).attr("opacity", 1);
+    
+    
+                setTimeout(() => {
+                    barAxis.selectAll(".tick text")
+                        .attr("class", "legend")
+                      .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
+                  }, 0);
+    
+              }
         })
     }
 
     function showTooltip(data, dataTime, categoryLabels, categoriesX) {
-        console.log(data, dataTime)
+        // console.log(data, dataTime)
         d3.select("#staticTooltip")
           .selectAll("html").remove()
 
