@@ -7,14 +7,19 @@ Promise.all([
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/6800cd1df1205c0260f685fd83399cef/raw/e3a7d34515f4f96a8d5b4794d6cdc878f3f7b1f8/ukUrbRural_simple.csv", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
 
     ]).then((datasets) => {
 
     let hex_la = datasets[0]
     let ukUpd_tot = datasets[1]
     let ukUpd_time = datasets[2]
-    let ukUrbRural = datasets[3]
+    let engUrbRural = datasets[3]
+    let scotUrbRural = datasets[4]
 
+    let ukUrbRural = d3.merge([engUrbRural, scotUrbRural])
+
+    console.log(ukUrbRural)
     renderChart(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
     // renderLegend()
     })
@@ -150,7 +155,7 @@ Promise.all([
         }))//.filter(d=>d.urbCategory!==null)//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
         
         console.log("urb",ukUrbRural)
-        console.log(hexes)
+        console.log("hex", hexes)
         //   cluster data for dot clusters
         //   const clustered = hexes.map(d=>({...d, cluster: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
         //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
@@ -169,13 +174,27 @@ Promise.all([
           console.log(clusterData)
           const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
           const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-                                    "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+                                    "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
+          var sortOrder = ['n', 'a', 'u']                                                           
           const scaleXCategory = d3.scaleBand().domain(categoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
           const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleY = d3.scaleLinear().domain([0, 85]).range([figHeight- margin.bottom, 0]); 
 
           //   variables for dot clusters bars urban rural
-          const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
+          const ruralData = d3.groups(
+              ukUrbRural
+              .map(d=>({...d, category: hexes.filter(c=>c.key===d.LAD11CD)[0]!==undefined?
+                                                  hexes.filter(c=>c.key===d.LAD11CD)[0].category:null
+                                                }))
+                .filter(d=>hexes.map(d=>d.key).filter(onlyUnique).includes(d.LAD11CD)), v=>v.RUC11)
+                .map(d=> { 
+                  return {urbCategory: d[0], data: d[1].sort((a,b)=> d3.descending(a.category,b.category))
+                    .map((c, i) =>({ ...c, row: i}))
+                    }
+                })
+                // .map(d=>({...d, data: d.data.sort((a,b)=> d3.descending(a.category,b.category))}))
+
+        //   const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
         // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
 
         //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
@@ -323,7 +342,8 @@ Promise.all([
                                             // .raise()
                                         showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
                                         // console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
-                                        console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.LAD11CD===d.key)[0])
+                                        console.log(d)
+                                        // console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.LAD11CD===d.key)[0])
           })
           .on("mouseleave", function(event, d) { 
                                           d3.select(this)
@@ -727,7 +747,7 @@ Promise.all([
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5))
 
                .attr("r", radius)
-               .attr("opacity", d=>d.income!==null?1:0)
+            //    .attr("opacity", d=>d.income!==null?1:0)
     
                annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
     
@@ -800,6 +820,10 @@ Promise.all([
             }
         });
     };
+
+    function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+      }
 
     function isOdd(num) { return num % 2;}
 
