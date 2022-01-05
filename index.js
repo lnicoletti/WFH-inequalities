@@ -8,6 +8,7 @@ Promise.all([
     d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
+    
     d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType)
 
@@ -22,12 +23,28 @@ Promise.all([
     let hex_us = datasets[6]
 
     let ukUrbRural = d3.merge([engUrbRural, scotUrbRural])
+    // let ukUrbRural = engUrbRural
+
 
     // console.log(ukUrbRural)
-    // renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
+    renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
 
-    console.log(hex_us)
-    renderChartUs(hex_us, uSuPd_tot)
+    d3.select("#chartCountry").on("change", function(select){
+        // d3.selectAll(".AxisLAN").remove()
+        // d3.selectAll(".laCircle").remove()
+        d3.select("#chart").selectAll("svg").remove()
+        var country = d3.select("#chartCountry").node().value
+            console.log(country)
+
+        if (country==="UK") {
+            renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
+
+        } else if (country==="USA") {
+            renderChartUs(hex_us, uSuPd_tot)
+        }
+    })
+    // console.log(hex_us)
+    // renderChartUs(hex_us, uSuPd_tot)
     // renderLegend()
     })
 
@@ -222,7 +239,7 @@ Promise.all([
           const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
         //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
-        // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
+        // const scaleYurb = d3.scaleLinear().domain([0, 175]).range([figHeight-margin.bottom, 0]); 
 
           
           
@@ -676,15 +693,15 @@ Promise.all([
                 // console.log(numThrees)
                 const numFours = d3.range(3, 400, 4)
 
-                // const numZeros = d3.range(0, 100, 6)
+                // const numZeros = d3.range(0, 500, 6)
                 // // console.log(numZeros)
-                // const numTwos = d3.range(1, 100, 6)
+                // const numTwos = d3.range(1, 500, 6)
                 // // console.log(numTwos)
-                // const numThrees = d3.range(2, 100, 6)
+                // const numThrees = d3.range(2, 500, 6)
                 // // console.log(numThrees)
-                // const numFours = d3.range(3, 100, 6)
-                // const numFives = d3.range(4, 100, 6)
-                // const numSix = d3.range(5, 100, 6)
+                // const numFours = d3.range(3, 500, 6)
+                // const numFives = d3.range(4, 500, 6)
+                // const numSix = d3.range(5, 500, 6)
     
                 svg.selectAll(".AxisLAN").remove()
     
@@ -932,8 +949,8 @@ Promise.all([
 
           console.log(clusterData)
           const categoriesX = ["#c8b35a", "#9972af", "#976b82", "#c8ada0", "#cbb8d7", "#af8e53", "#804d36", "#e4d9ac", "#e8e8e8"] 
-          const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-                                    "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
+          const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, High Travel", "Mid. Income, Mid. Travel", 
+                                     "Low Income, Mid. Travel", "High Income, High Travel", "High Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel"]  
 
          var sortOrder = ["#c8b35a", "#e4d9ac", "#af8e53", "#c8ada0", "#e8e8e8", "#cbb8d7", "#9972af", "#976b82", "#804d36"]  
         //   var sortOrder = ["High Income, Low Travel", "Mid. Income, Low Travel", "High Income, Mid. Travel", "Mid. Income, Mid. Travel", 
@@ -1034,6 +1051,7 @@ Promise.all([
           .call(g => g.select(".domain").remove())
           .call(g => g.select(".tick:last-of-type text").clone()
               .attr("x", 4)
+              .attr("y", -10)
               .attr("text-anchor", "start")
               .attr("font-weight", "bold")
               .attr("class", "legend")
@@ -1297,10 +1315,18 @@ Promise.all([
 
           } else if (view==="bars"){
 
-            // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
+            // #c8b35a
+            // "#804d36", "#e8e8e8"
+            console.log("highInc/lowCom + lowInc/highCom = ", 
+                            circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length+
+                            circles.filter(d=>d.category==="#c8b35a")._groups[0].length/circles._groups[0].length)
 
-            const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
-            console.log(pctLH)
+            console.log("highInc/highCom + lowInc/lowCom = ", 
+                            circles.filter(d=>d.category==="#804d36")._groups[0].length/circles._groups[0].length+
+                            circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length)
+
+            // const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
+            // console.log(pctLH)
             const numZeros = d3.range(0, 1000, 8)
             // console.log(numZeros)
             const numTwos = d3.range(1, 1000, 8)
@@ -1493,7 +1519,7 @@ Promise.all([
 
                 var transition = d3.transition()
 
-                console.log(circles.filter(d=>d.urbCategory===null))
+                console.log(circles.filter(d=>d.urbCategory===null&&d!==undefined))
     
                 circles.filter(d=>d.urbCategory!==null)//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
     

@@ -264,7 +264,7 @@ font-family:'Lato', sans-serif;
     text-transform: uppercase;
   }
 
-  #chartView {
+  #chartView, #chartCountry {
       background-color: #fffae7;
       width: 120px;
       height:30px;
