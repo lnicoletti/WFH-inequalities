@@ -353,7 +353,7 @@ Promise.all([
                                         .style("text-transform", "uppercase")
                                         .attr("font-weight", 700)
                                             // .raise()
-                                        showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
+                                        showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX, "UK")
                                         // console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
                                         console.log(d)
                                         // console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.LAD11CD===d.key)[0])
@@ -415,7 +415,7 @@ Promise.all([
             .attr("font-size", fontSize*2)
             .style("text-transform", "uppercase")
             .attr("font-weight", 700)
-            showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX)
+            showTooltip(d, ukUpd_time.filter(c=>c.area_code===d.key)[0], categoryLabels, categoriesX, "UK")
                 // .raise()
             })
             .on("mouseleave", function(event, d) { 
@@ -815,7 +815,7 @@ Promise.all([
         // const figHeight = height*figScale
         const figWidth = 850
         const scatterWidth = figWidth-100
-        const figHeight = 500
+        const figHeight = 540
         const radius = 4.3//10//9.8
         const radiusHover = radius*2
         const boundWidth = 4
@@ -868,7 +868,7 @@ Promise.all([
               <marker id="arrow" markerHeight=10 markerWidth=10 refX=3 refY=3 orient=auto>
                 <path d="M0,0L6,3L0,6Z" />
               </marker>
-              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${radius} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
+              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${10} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
                 <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
           ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
               </circle>`)}
@@ -931,7 +931,7 @@ Promise.all([
           const clusterData = d3.groups(hexes, v=>v.category).map(d=> { return {category: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}}).filter(d=>d.category!=="#ccc")
 
           console.log(clusterData)
-          const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
+          const categoriesX = ["#c8b35a", "#9972af", "#976b82", "#c8ada0", "#cbb8d7", "#af8e53", "#804d36", "#e4d9ac", "#e8e8e8"] 
           const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
                                     "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
 
@@ -941,50 +941,53 @@ Promise.all([
         //                     "High Income, High Travel"]                                                           
           const scaleXCategory = d3.scaleBand().domain(categoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
           const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
-          const scaleY = d3.scaleLinear().domain([0, 85]).range([figHeight- margin.bottom, 0]); 
+          const scaleY = d3.scaleLinear().domain([0, 480]).range([figHeight- margin.bottom, 0]); 
 
-        //   /////////////////////UNCOMMENT
-        //   //   variables for dot clusters bars urban rural
-        //   const ruralData = d3.groups(
-        //       ukUrbRural
-        //       .map(d=>({...d, category: hexes.filter(c=>c.key===d.LAD11CD)[0]!==undefined?
-        //                                           hexes.filter(c=>c.key===d.LAD11CD)[0].category:null
-        //                                         }))
-        //         .filter(d=>hexes.map(d=>d.key).filter(onlyUnique).includes(d.LAD11CD)), v=>v.RUC11)
-        //         .map(d=> { 
-        //           return {urbCategory: d[0], data: d[1].sort(function(a, b) {
-        //             return sortOrder.indexOf(a.category) - sortOrder.indexOf(b.category);
-        //           })//.sort((a,b)=> d3.descending(a.category,b.category))
-        //             .map((c, i) =>({ ...c, row: i}))
-        //             }
-        //         })
-        //         // .map(d=>({...d, data: d.data.sort((a,b)=> d3.descending(a.category,b.category))}))
+          /////////////////////UNCOMMENT
+          //   variables for dot clusters bars urban rural
+          const ruralData = d3.groups(
+              hexes,
+            //   .map(d=>({...d, category: hexes.filter(c=>c.key===d.LAD11CD)[0]!==undefined?
+            //                                       hexes.filter(c=>c.key===d.LAD11CD)[0].category:null
+            //                                     }))
+                // .filter(d=>hexes.map(d=>d.fullName).filter(onlyUnique).includes(d.fullName)), 
+                v=>v.urbCategory
+                )
+                .filter(d=>d[0]!==null)
+                .map(d=> { 
+                  return {urbCategory: d[0], data: d[1].sort(function(a, b) {
+                    return sortOrder.indexOf(a.category) - sortOrder.indexOf(b.category);
+                  })//.sort((a,b)=> d3.descending(a.category,b.category))
+                    .map((c, i) =>({ ...c, row: i}))
+                    }
+                })
+                // .map(d=>({...d, data: d.data.sort((a,b)=> d3.descending(a.category,b.category))}))
 
-        // //   const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
-        // // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
+        //   const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
+        // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
 
-        // //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
+        //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
 
-        //   console.log(ruralData)
-        // //   console.log("ruralRaw", ukUrbRural)
-        //   const urbCategoriesX = ruralData.sort((a,b)=>b.data.length-a.data.length).map(d=>d.urbCategory)
-        // //   urbCategoriesX.push("No Data")
-        // //   console.log(urbCategoriesX)
-        // //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-        // //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
-        //   const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
-        // //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
-        //   const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
-        // // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
+          console.log("rural", ruralData)
+        //   console.log("ruralRaw", ukUrbRural)
+          const urbCategoriesX = ruralData.sort((a,b)=>b.data.length-a.data.length).map(d=>d.urbCategory)
+        //   urbCategoriesX.push("No Data")
+        //   console.log(urbCategoriesX)
+        //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
+        //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+          const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
+        //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
+          const scaleYurb = d3.scaleLinear().domain([0, 1500]).range([figHeight- margin.bottom, 0]); 
+        // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
 
           
           
-        // //   ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<rect width=${k} height=${k} x=${i * k} y=${(n - 1 - j) * k} fill=${colors[j * n + i]}>
-        // //         <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
-        // //   ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
-        // //       </rect>`)}
+        //   ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<rect width=${k} height=${k} x=${i * k} y=${(n - 1 - j) * k} fill=${colors[j * n + i]}>
+        //         <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
+        //   ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
+        //       </rect>`)}
 
-        //   /////////////////////UNCOMMENT
+          /////////////////////UNCOMMENT
 
           grid.append(legendIndex)
           // .attr("transform", `translate(550, 500)`);
@@ -992,11 +995,12 @@ Promise.all([
 
 
         // axes
-        const xScaleInc = d3.scaleLinear()
+        const xScaleInc = d3.scaleLinear()//d3.scaleSymlog()//
                         .domain(d3.extent(hexes, d => d[xVar])).nice()
                         .range([margin.left, scatterWidth - margin.right])
       
         const yScaleMob = d3.scaleLinear()
+                        // .domain([d3.min(hexes, d => d[yVar]), 5])//.nice()
                         .domain(d3.extent(hexes, d => d[yVar])).nice()
                         .range([figHeight - margin.bottom, margin.top])
 
@@ -1037,7 +1041,7 @@ Promise.all([
 
         
         const xAxisBars = g => g
-        .attr("transform", `translate(0,${figHeight - margin.bottom})`)
+        .attr("transform", `translate(8,${figHeight - margin.bottom})`)
         .call(d3.axisBottom(scaleXCategoryLabels))
         .call(g => g.select(".domain").remove())
         .call(g => g.append("text")
@@ -1089,7 +1093,8 @@ Promise.all([
           // .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined? "#ccc": 
           //                 colorScale(ukUpd_tot.filter(c=>c.area_code===d.key)[0][mapMetric]))
       
-          .attr("fill", d =>        
+          .attr("fill", d => d.mobilityWork===null?"#ccc": 
+                             d.income===null?"#ccc":      
                             colorBivar([d.mobilityWork, d.income]))
           .attr("class", "laCircle")
           .attr("cursor", "pointer")
@@ -1105,7 +1110,7 @@ Promise.all([
                                         //     .attr("font-size", fontSize*1.5)
                                         //     .attr("font-weight", 900)
 
-                                        circles.filter(c=>c.key===d.key)
+                                        circles.filter(c=>c.fullName===d.fullName)
                                             .attr("stroke-width", "1.5")
                                             .attr("r", radiusHover)
                                         
@@ -1114,10 +1119,10 @@ Promise.all([
                                         // .style("text-transform", "uppercase")
                                         // .attr("font-weight", 700)
                                             // .raise()
-                                        showTooltip(d, "", categoryLabels, categoriesX)
+                                        showTooltip(d, "", categoryLabels, categoriesX, "USA")
                                         // console.log(ukUpd_time.filter(c=>c.area_code===d.key)[0])
-                                        console.log(d)
-                                        // console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.LAD11CD===d.key)[0])
+                                        // console.log(d)
+                                        console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(c=>c.fullName===d.fullName)[0])
           })
           .on("mouseleave", function(event, d) { 
                                           d3.select(this)
@@ -1133,64 +1138,57 @@ Promise.all([
                                             // .lower()
           })
       
-        // d3.selectAll(".hex")
-        //   .on("mouseover", function(event, d) {d3.select(this).attr("stroke-width", "3")})
-      
-          // .on("mouseover", (event, d) => d3.select(this).attr("stroke-width", "3"))
-          // .on("mousemove", (event, d) => d3.select(this).attr("stroke-width", "3"))
-          // .on("mouseout", (event, d) => d3.select(this).attr("stroke-width", "1"))
-            
-              // .attr("fill", "#b0e8f0");
+       
       
           // Add the hex codes as labels
-          const annot = hexmap
-              .append("text")
-          .attr("x", function(hex) {return hex.x;})
-          .attr("y", function(hex) {return hex.y+1;})
-              // .append("tspan")
-              .attr("text-anchor", "middle")
-          .attr('class', 'LStextUK')
-          .attr('font-size', fontSize)
-          // .attr('font-size', 3*figScale)
-          .attr('fill', 'rgb(255,255,255)')
-          .attr("z-index", 10)
-          .text(function(hex) {return hex.n.slice(0,3);})
-          .attr("cursor", "pointer")
-          .on("mouseover", function(event, d) { 
-            //   d3.select(this)
-            //     .attr("stroke-width", "1.5")
-            //     .attr("r", radius*2)
-            //     // .moveToFront()
-            d3.select(this.parentNode).raise()
-            //     // .attr("z-index", 1000)
+        //   const annot = hexmap
+        //       .append("text")
+        //   .attr("x", function(hex) {return hex.x;})
+        //   .attr("y", function(hex) {return hex.y+1;})
+        //       // .append("tspan")
+        //       .attr("text-anchor", "middle")
+        //   .attr('class', 'LStextUK')
+        //   .attr('font-size', fontSize)
+        //   // .attr('font-size', 3*figScale)
+        //   .attr('fill', 'rgb(255,255,255)')
+        //   .attr("z-index", 10)
+        //   .text(function(hex) {return hex.n.slice(0,3);})
+        //   .attr("cursor", "pointer")
+        //   .on("mouseover", function(event, d) { 
+        //     //   d3.select(this)
+        //     //     .attr("stroke-width", "1.5")
+        //     //     .attr("r", radius*2)
+        //     //     // .moveToFront()
+        //     d3.select(this.parentNode).raise()
+        //     //     // .attr("z-index", 1000)
 
-            // console.log(d3.select(this.parentNode))
-            //     .attr("font-size", fontSize*1.5)
-            //     .attr("font-weight", 900)
+        //     // console.log(d3.select(this.parentNode))
+        //     //     .attr("font-size", fontSize*1.5)
+        //     //     .attr("font-weight", 900)
 
-            circles.filter(c=>c.key===d.key)
-                .attr("stroke-width", "1.5")
-                .attr("r", radiusHover)
+        //     circles.filter(c=>c.key===d.key)
+        //         .attr("stroke-width", "1.5")
+        //         .attr("r", radiusHover)
             
-            annot.filter(c=>c.key===d.key)
-            .attr("font-size", fontSize*2)
-            .style("text-transform", "uppercase")
-            .attr("font-weight", 700)
-            showTooltip(d, "", categoryLabels, categoriesX)
-                // .raise()
-            })
-            .on("mouseleave", function(event, d) { 
-                    circles.filter(c=>c.key===d.key)
-                            .attr("stroke-width", "0.5")
-                            .attr("r", radius)
-                            .moveToBack()
+        //     annot.filter(c=>c.key===d.key)
+        //     .attr("font-size", fontSize*2)
+        //     .style("text-transform", "uppercase")
+        //     .attr("font-weight", 700)
+        //     showTooltip(d, "", categoryLabels, categoriesX, "USA")
+        //         // .raise()
+        //     })
+        //     .on("mouseleave", function(event, d) { 
+        //             circles.filter(c=>c.key===d.key)
+        //                     .attr("stroke-width", "0.5")
+        //                     .attr("r", radius)
+        //                     .moveToBack()
 
-                        annot.filter(c=>c.key===d.key)
-                        .attr("font-size", fontSize)
-                        .style("text-transform", "capitalize")
-                        .attr("font-weight", 500)
-                            // .lower()
-            })
+        //                 annot.filter(c=>c.key===d.key)
+        //                 .attr("font-size", fontSize)
+        //                 .style("text-transform", "capitalize")
+        //                 .attr("font-weight", 500)
+        //                     // .lower()
+        //     })
         //   .on("mouseover", function(event, d) { 
         //     d3.select(this)
             //   .attr("font-size", fontSize*1.5)
@@ -1215,7 +1213,7 @@ Promise.all([
 
             svg.selectAll(".AxisLAN").remove()
 
-            circles.filter(d=>d.category==="#ccc")
+            circles.filter(d=>d.category==="#ccc")//||d.mobilityWork===0
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
@@ -1223,15 +1221,15 @@ Promise.all([
             .attr("cy", 200)
             .attr("opacity", 0)
 
-            annot.filter(d=>d.category==="#ccc")
-            .transition()
-           .duration(750)
-           .ease(d3.easeLinear)
-            .attr("x", 200)
-            .attr("y", 200)
-            .attr("opacity", 0)
+        //     annot.filter(d=>d.category==="#ccc")
+        //     .transition()
+        //    .duration(750)
+        //    .ease(d3.easeLinear)
+        //     .attr("x", 200)
+        //     .attr("y", 200)
+        //     .attr("opacity", 0)
       
-            circles.filter(d=>d.category!=="#ccc")
+            circles.filter(d=>d.category!=="#ccc")//||d.mobilityWork!==0
               .transition()
               .duration(750)
               .ease(d3.easeLinear)
@@ -1244,10 +1242,10 @@ Promise.all([
             //   .attr("r", radius/1.5)
             //   .attr("opacity", d=>d.income!==null?1:0)
       
-            annot.filter(d=>d.category!=="#ccc")
-               .transition()
-              .duration(750)
-              .ease(d3.easeLinear)
+            // annot.filter(d=>d.category!=="#ccc")
+            //    .transition()
+            //   .duration(750)
+            //   .ease(d3.easeLinear)
       
               .attr("x", d => xScaleInc(d[xVar]))
               .attr("y", d=> yScaleMob(d[yVar]))
@@ -1281,21 +1279,21 @@ Promise.all([
             //   .attr("transform", function(hex) {
                   // 	return "translate(" + hex.x + "," + hex.y + ")";
                   // })
-              .attr("cx", function(hex) {return hex.x;})
-              .attr("cy", function(hex) {return hex.y;})
+              .attr("cx", function(hex) {return xScaleHex(hex.x);})
+              .attr("cy", function(hex) {return yScaleHex(hex.y);})
               .attr("r", radius)
               .attr("opacity", 1)
       
-             annot
-               .transition()
-              .duration(750)
-              .ease(d3.easeLinear)
-            //   .attr("transform", function(hex) {
-                  // 	return "translate(" + hex.x + "," + hex.y + ")";
-                  // })
-              .attr("x", function(hex) {return hex.x;})
-              .attr("y", function(hex) {return hex.y;})
-              .attr("opacity", 1)
+            //  annot
+            //    .transition()
+            //   .duration(750)
+            //   .ease(d3.easeLinear)
+            // //   .attr("transform", function(hex) {
+            //       // 	return "translate(" + hex.x + "," + hex.y + ")";
+            //       // })
+            //   .attr("x", function(hex) {return hex.x;})
+            //   .attr("y", function(hex) {return hex.y;})
+            //   .attr("opacity", 1)
 
           } else if (view==="bars"){
 
@@ -1303,12 +1301,17 @@ Promise.all([
 
             const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
             console.log(pctLH)
-            const numZeros = d3.range(0, 100, 3)
+            const numZeros = d3.range(0, 1000, 8)
             // console.log(numZeros)
-            const numTwos = d3.range(1, 100, 3)
+            const numTwos = d3.range(1, 1000, 8)
             // console.log(numTwos)
-            const numThrees = d3.range(2, 100, 3)
+            const numThrees = d3.range(2, 1000, 8)
             // console.log(numThrees)
+            const numFours = d3.range(3, 1000, 8)
+            const numFives = d3.range(4, 1000, 8)
+            const numSix = d3.range(5, 1000, 8)
+            const numSevens = d3.range(6, 1000, 8)
+            const numEights = d3.range(7, 1000, 8)
 
             svg.selectAll(".AxisLAN").remove()
 
@@ -1320,13 +1323,13 @@ Promise.all([
            .attr("cy", 500)
            .attr("opacity", 0)
 
-            annot.filter(d=>d.category==="#ccc")
-            .transition()
-           .duration(750)
-           .ease(d3.easeLinear)
-           .attr("x", 200)
-           .attr("y", 500)
-           .attr("opacity", 0)
+        //     annot.filter(d=>d.category==="#ccc")
+        //     .transition()
+        //    .duration(750)
+        //    .ease(d3.easeLinear)
+        //    .attr("x", 200)
+        //    .attr("y", 500)
+        //    .attr("opacity", 0)
 
             circles.filter(d=>d.category!=="#ccc")//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
@@ -1350,10 +1353,20 @@ Promise.all([
             //                     scaleXCategory(d.category)+20:
             //                     scaleXCategory(d.category))
             .attr("cx", (d, i)=>
-                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleXCategory(d.category)+40:
-                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleXCategory(d.category)+20:
+                                numEights.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+63:
+                                numSevens.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+54:
+                                numSix.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+45:
+                                numFives.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+36:
+                                numFours.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+27:
+                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+18:
+                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleXCategory(d.category)+9:
                                 scaleXCategory(d.category))
             // .attr("cx", (d, i)=>console.log(isOdd(i)))
             // .attr("cy", (d, i) =>isMthree(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)? 
@@ -1368,11 +1381,21 @@ Promise.all([
             //                      scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
             .attr("cy", (d, i)=>
-                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):
-                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
+                                numEights.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row):
+                                numSevens.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+1):
+                                numSix.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+2):
+                                numFives.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+3):
+                                numFours.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+4):
+                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+5):
+                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+6):
+                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.fullName===d.fullName)[0].row+7))
 
         //    .attr("cy", (d, i) => d.category!=="#ccc"?scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):null)
         //    .attr("cy", (d, i) => i * r * 2)
@@ -1380,25 +1403,25 @@ Promise.all([
            .attr("r", radius)
            .attr("opacity", d=>d.income!==null?1:0)
 
-           annot.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+        //    annot.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
-            .transition()
-            .duration(750)
-            .ease(d3.easeLinear)
-            .attr("x", (d, i)=>
-                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleXCategory(d.category)+40:
-                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleXCategory(d.category)+20:
-                                scaleXCategory(d.category))
+        //     .transition()
+        //     .duration(750)
+        //     .ease(d3.easeLinear)
+        //     .attr("x", (d, i)=>
+        //                         numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
+        //                         scaleXCategory(d.category)+40:
+        //                         numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
+        //                         scaleXCategory(d.category)+20:
+        //                         scaleXCategory(d.category))
             
 
-            .attr("y", (d, i)=>
-                                numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):
-                                numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
-                                scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
+        //     .attr("y", (d, i)=>
+        //                         numThrees.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
+        //                         scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):
+        //                         numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
+        //                         scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
+        //                         scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
 
             let barAxis = svg.append("g")
             .call(xAxisBars)
@@ -1429,13 +1452,26 @@ Promise.all([
                 // // console.log(numThrees)
                 // const numFours = d3.range(3, 400, 4)
                 
-                const numZeros = d3.range(0, 400, 4)
+                const numZeros = d3.range(0, 1000, 17)
                 // console.log(numZeros)
-                const numTwos = d3.range(1, 400, 4)
+                const numTwos = d3.range(1, 1000, 17)
                 // console.log(numTwos)
-                const numThrees = d3.range(2, 400, 4)
+                const numThrees = d3.range(2, 1000, 17)
                 // console.log(numThrees)
-                const numFours = d3.range(3, 400, 4)
+                const numFours = d3.range(3, 1000, 17)
+                const numFives = d3.range(4, 1000, 17)
+                const numSix = d3.range(5, 1000, 17)
+                const numSevens = d3.range(6, 1000, 17)
+                const numEights = d3.range(7, 1000, 17)
+                const numNines = d3.range(8, 1000, 17)
+                const numTens = d3.range(9, 1000, 17)
+                const numElevens = d3.range(10, 1000, 17)
+                const numTwelves = d3.range(11, 1000, 17)
+                const numThirteens = d3.range(12, 1000, 17)
+                const numFourteens = d3.range(13, 1000, 17)
+                const numFifteens = d3.range(14, 1000, 17)
+                const numSixteens = d3.range(15, 1000, 17)
+                const numSeventeens = d3.range(16, 1000, 17)
 
                 // const numZeros = d3.range(0, 100, 6)
                 // // console.log(numZeros)
@@ -1457,42 +1493,94 @@ Promise.all([
                .attr("cy", 500)
                .attr("opacity", 0)
     
-                annot.filter(d=>d.urbCategory===null)
-                .transition()
-               .duration(750)
-               .ease(d3.easeLinear)
-               .attr("x", 200)
-               .attr("y", 500)
-               .attr("opacity", 0)
-    
-                circles.filter(d=>d.urbCategory!==null)//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
-    
-                .transition()
-                .delay((d, i) => {
-                return i * Math.random() * 1.5;
-                })
-                .duration(800)
+            //     annot.filter(d=>d.urbCategory===null)
             //     .transition()
             //    .duration(750)
             //    .ease(d3.easeLinear)
+            //    .attr("x", 200)
+            //    .attr("y", 500)
+            //    .attr("opacity", 0)
+    
+                circles.filter(d=>d.urbCategory!==null)//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+    
+                // .transition()
+                // .delay((d, i) => {
+                // return i * Math.random() * 1.5;
+                // })
+                // .duration(800)
+                .transition()
+               .duration(750)
+               .ease(d3.easeLinear)
 
                 .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+60:
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+40:
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+20:
+                                    numSeventeens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+144:
+                                    numSixteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+135:
+                                    numFifteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+126:
+                                    numFourteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+117:
+                                    numThirteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+108:
+                                    numTwelves.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+99:
+                                    numElevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+90:
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+81:
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+72:
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+63:
+                                    numSevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+54:
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+45:
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+36:
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+27:
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+18:
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+9:
                                     scaleXurbCategory(d.urbCategory))
     
                 .attr("cy", (d, i)=>
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+                                    numSeventeens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row):
+                                    numSixteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+1):
+                                    numFifteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+2):
+                                    numFourteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+3):
+                                    numThirteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+4):
+                                    numTwelves.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+5):
+                                    numElevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+6):
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+7):
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+8):
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+9):
+                                    numSevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+10):
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+11):
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+12):
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+13):
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+14):
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+15):
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+16))
 
                 // .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
                 //                     numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
@@ -1523,28 +1611,28 @@ Promise.all([
                .attr("r", radius)
             //    .attr("opacity", d=>d.income!==null?1:0)
     
-               annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+            //    annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
     
-                .transition()
-                .duration(750)
-                .ease(d3.easeLinear)
-                .attr("x", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+60:
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+40:
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+20:
-                                    scaleXurbCategory(d.urbCategory))
+            //     .transition()
+            //     .duration(750)
+            //     .ease(d3.easeLinear)
+            //     .attr("x", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+            //                         numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleXurbCategory(d.urbCategory)+60:
+            //                         numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleXurbCategory(d.urbCategory)+40:
+            //                         numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleXurbCategory(d.urbCategory)+20:
+            //                         scaleXurbCategory(d.urbCategory))
     
-                .attr("y", (d, i)=>
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+            //     .attr("y", (d, i)=>
+            //                         numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+            //                         numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+            //                         numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
 
                 let barAxis = svg.append("g")
                 .call(xAxisBarsUrb)
@@ -1564,14 +1652,16 @@ Promise.all([
         })
     }
 
-    function showTooltip(data, dataTime, categoryLabels, categoriesX) {
+    function showTooltip(data, dataTime, categoryLabels, categoriesX, country) {
         // console.log(data, dataTime)
         d3.select("#staticTooltip")
           .selectAll("html").remove()
 
+
         d3.select("#staticTooltip")
           .append("html")
-          .html(`During the COVID-19 Pandemic, residents of the <strong class="rich" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${data.n}</strong>, traveled to work <strong class="rich" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
+          .html(`During the COVID-19 Pandemic, residents of the <strong class="rich" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${country==="UK"?data.n: data.fullName}</strong>, traveled to work <strong class="rich" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
+
     }
 
     function hideTooltip() {
