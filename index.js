@@ -4,11 +4,17 @@ Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
     d3.json("https://gist.githubusercontent.com/lnicoletti/9be9db8307920b88fe71d5ec304e0fa3/raw/64881a3e2e97ef5cb15c6768e4b401c8018ec39a/ukUpd_tot_final.json"),
     d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth"),
+    
+    // uk urb rural
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/6800cd1df1205c0260f685fd83399cef/raw/e3a7d34515f4f96a8d5b4794d6cdc878f3f7b1f8/ukUrbRural_simple.csv", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
-    // d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
     
+    //// d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
+    
+    // scot urb rural
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/5646b53ec08fd460afec2c92a083de13/raw/49410a19ab75ed3dcbb4106b4c5002477dc4517a/urbanRuralScotland_simple.csv", d3.autoType),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
+
     d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType)
 
@@ -776,7 +782,6 @@ Promise.all([
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4):
                 //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5))
 
-               .attr("r", radius)
             //    .attr("opacity", d=>d.income!==null?1:0)
     
                annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
