@@ -6,14 +6,18 @@ Promise.all([
     d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth"),
     
     // uk urb rural
+    //// old data
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/6800cd1df1205c0260f685fd83399cef/raw/e3a7d34515f4f96a8d5b4794d6cdc878f3f7b1f8/ukUrbRural_simple.csv", d3.autoType),
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/9b5df10403fd89cc6af0ee8cd26b7925/raw/cacd508ed040a1d190401e9b16247b970181aac1/ukUrbRural_2class.csv", d3.autoType),
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/7baf3e11996edb30a5fb590d3f76f7ef/raw/11a7c8f3ff3525e565776f9406facc2f793bede4/ukUrbRural.csv", d3.autoType),
     
     //// d3.csv("https://gist.githubusercontent.com/lnicoletti/97a897e8d32fa77e1bbfd4b53f2973bf/raw/686be1c93395524e5fae49adf4ba33046979f6c2/urbanRuralUkthreeFold.csv", d3.autoType),
     
     // scot urb rural
+    //// old data
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/5646b53ec08fd460afec2c92a083de13/raw/49410a19ab75ed3dcbb4106b4c5002477dc4517a/urbanRuralScotland_simple.csv", d3.autoType),
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/1117ef6f526534506e96f981758a5602/raw/e0611a8a1ce43b9debb8c04465d8a67a054e6b2c/urbanRuralScotland_2class.csv", d3.autoType),
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
 
     d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
     d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType)
@@ -218,8 +222,9 @@ Promise.all([
           const ruralData = d3.groups(
               ukUrbRural
               .map(d=>({...d, category: hexes.filter(c=>c.key===d.LAD11CD)[0]!==undefined?
-                                                  hexes.filter(c=>c.key===d.LAD11CD)[0].category:null
+                                        hexes.filter(c=>c.key===d.LAD11CD)[0].category:null
                                                 }))
+                .filter(d=>d.category!=="#ccc")
                 .filter(d=>hexes.map(d=>d.key).filter(onlyUnique).includes(d.LAD11CD)), v=>v.RUC11)
                 .map(d=> { 
                   return {urbCategory: d[0], data: d[1].sort(function(a, b) {
@@ -244,8 +249,10 @@ Promise.all([
         //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
           const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
         //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
-          const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
-        // const scaleYurb = d3.scaleLinear().domain([0, 175]).range([figHeight-margin.bottom, 0]); 
+        // more categories of urban
+        //   const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
+        // less categories of urban
+        const scaleYurb = d3.scaleLinear().domain([0, 285]).range([figHeight-margin.bottom, 0]); 
 
           
           
@@ -500,11 +507,8 @@ Promise.all([
       
               .attr("cx", d => xScaleInc(d[xVar]))
               .attr("cy", d=> yScaleMob(d[yVar]))
-            //   .attr("transform", function(hex) {
-                  // 	return "translate(" + (-hex.x) + "," + (-hex.y) + ")";
-                  // })
-            //   .attr("r", radius/1.5)
-            //   .attr("opacity", d=>d.income!==null?1:0)
+              .attr("opacity", d=>d.income!==null?1:0)
+
       
             annot.filter(d=>d.category!=="#ccc")
                .transition()
@@ -513,11 +517,9 @@ Promise.all([
       
               .attr("x", d => xScaleInc(d[xVar]))
               .attr("y", d=> yScaleMob(d[yVar]))
-            //   .attr("opacity", 0)
+              .attr("opacity", d=>d.income!==null?1:0)
               
-              // .attr("transform", d => `translate(${xScaleIncome(d["income"])},
-              //                                    ${yScaleTotMob(d["workplaces_percent_change_from_baseline"])})`)
-              // .attr("r", 2.5)
+
 
               svg.append("g")
               .call(xAxis)
@@ -636,7 +638,7 @@ Promise.all([
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
 
-        //    .attr("cy", (d, i) => d.category!=="#ccc"?scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):null)
+                                //    .attr("cy", (d, i) => d.category!=="#ccc"?scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row):null)
         //    .attr("cy", (d, i) => i * r * 2)
         //    .attr("cy", figHeight-marginTop)
            .attr("r", radius)
@@ -661,6 +663,7 @@ Promise.all([
                                 numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
+            .attr("opacity", d=>d.income!==null?1:0)                                
 
             let barAxis = svg.append("g")
             .call(xAxisBars)
@@ -691,27 +694,33 @@ Promise.all([
                 // // console.log(numThrees)
                 // const numFours = d3.range(3, 400, 4)
                 
-                const numZeros = d3.range(0, 400, 4)
-                // console.log(numZeros)
-                const numTwos = d3.range(1, 400, 4)
-                // console.log(numTwos)
-                const numThrees = d3.range(2, 400, 4)
-                // console.log(numThrees)
-                const numFours = d3.range(3, 400, 4)
-
-                // const numZeros = d3.range(0, 500, 6)
+                // // 4 columns of bars
+                // const numZeros = d3.range(0, 400, 4)
                 // // console.log(numZeros)
-                // const numTwos = d3.range(1, 500, 6)
+                // const numTwos = d3.range(1, 400, 4)
                 // // console.log(numTwos)
-                // const numThrees = d3.range(2, 500, 6)
+                // const numThrees = d3.range(2, 400, 4)
                 // // console.log(numThrees)
-                // const numFours = d3.range(3, 500, 6)
-                // const numFives = d3.range(4, 500, 6)
-                // const numSix = d3.range(5, 500, 6)
+                // const numFours = d3.range(3, 400, 4)
+
+                // seven columns of bars
+                const numZeros = d3.range(0, 500, 10)
+                // console.log(numZeros)
+                const numTwos = d3.range(1, 500, 10)
+                // console.log(numTwos)
+                const numThrees = d3.range(2, 500, 10)
+                // console.log(numThrees)
+                const numFours = d3.range(3, 500, 10)
+                const numFives = d3.range(4, 500, 10)
+                const numSix = d3.range(5, 500, 10)
+                const numSeven = d3.range(6, 500, 10)
+                const numEights = d3.range(7, 500, 10)
+                const numNines = d3.range(8, 500, 10)
+                const numTens = d3.range(9, 500, 10)
     
                 svg.selectAll(".AxisLAN").remove()
     
-                circles.filter(d=>d.urbCategory===null)
+                circles.filter(d=>d.urbCategory===null||d.category==="#ccc")
                 .transition()
                .duration(750)
                .ease(d3.easeLinear)
@@ -719,7 +728,7 @@ Promise.all([
                .attr("cy", 500)
                .attr("opacity", 0)
     
-                annot.filter(d=>d.urbCategory===null)
+                annot.filter(d=>d.urbCategory===null||d.category==="#ccc")
                 .transition()
                .duration(750)
                .ease(d3.easeLinear)
@@ -727,7 +736,7 @@ Promise.all([
                .attr("y", 500)
                .attr("opacity", 0)
     
-                circles.filter(d=>d.urbCategory!==null)//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+                circles.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
     
                 .transition()
                 .delay((d, i) => {
@@ -738,29 +747,7 @@ Promise.all([
             //    .duration(750)
             //    .ease(d3.easeLinear)
 
-                .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+60:
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+40:
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+20:
-                                    scaleXurbCategory(d.urbCategory))
-    
-                .attr("cy", (d, i)=>
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
-
                 // .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
-                //                     numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleXurbCategory(d.urbCategory)+100:
-                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleXurbCategory(d.urbCategory)+80:
                 //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                 //                     scaleXurbCategory(d.urbCategory)+60:
                 //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
@@ -770,42 +757,122 @@ Promise.all([
                 //                     scaleXurbCategory(d.urbCategory))
     
                 // .attr("cy", (d, i)=>
-                //                     numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                //                     numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
                 //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
                 //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
                 //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4):
-                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5))
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+
+                .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+180+35:
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+160+35:
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+140+35:
+                                    numSeven.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+120+35:
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+100+35:
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+80+35:
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+60+35:
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+40+35:
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+20+35:
+                                    scaleXurbCategory(d.urbCategory)+35)
+    
+                .attr("cy", (d, i)=>
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                                    numSeven.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3):
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4):
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5):
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+6):
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+7):
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+8):
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+9))
 
             //    .attr("opacity", d=>d.income!==null?1:0)
     
-               annot.filter(d=>d.urbCategory!==null)//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
+               annot.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
     
                 .transition()
                 .duration(750)
                 .ease(d3.easeLinear)
+                // .attr("x", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+60:
+                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+40:
+                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleXurbCategory(d.urbCategory)+20:
+                //                     scaleXurbCategory(d.urbCategory))
+    
+                // .attr("y", (d, i)=>
+                //                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
+                //                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
+                //                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
+                //                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+
                 .attr("x", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+180+35:
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+160+35:
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+140+35:
+                                    numSeven.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+120+35:
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+100+35:
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleXurbCategory(d.urbCategory)+80+35:
                                     numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+60:
+                                    scaleXurbCategory(d.urbCategory)+60+35:
                                     numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+40:
+                                    scaleXurbCategory(d.urbCategory)+40+35:
                                     numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
-                                    scaleXurbCategory(d.urbCategory)+20:
-                                    scaleXurbCategory(d.urbCategory))
+                                    scaleXurbCategory(d.urbCategory)+20+35:
+                                    scaleXurbCategory(d.urbCategory)+35)
     
                 .attr("y", (d, i)=>
-                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row):
-                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+1):
-                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+2):
-                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3))
+                                    numSeven.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+3):
+                                    numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+4):
+                                    numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+5):
+                                    numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+6):
+                                    numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+7):
+                                    numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row)?
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+8):
+                                    scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+9))
 
                 let barAxis = svg.append("g")
                 .call(xAxisBarsUrb)
