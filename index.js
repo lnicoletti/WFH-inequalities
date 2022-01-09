@@ -1,4 +1,11 @@
 // d3 = require('d3', "d3-hexjson")
+const vizTheme = "theEconomist"
+// const vizTheme = "theNytimes"
+// const vizTheme = "original"
+        // color settings
+const colorSchemes = new Map([{scheme:"original", colors:["#e8e8e8", "#e4d9ac", "#c8b35a", "#cbb8d7", "#c8ada0", "#af8e53", "#9972af", "#976b82", "#804d36"]}, 
+                        {scheme:"theEconomist", colors:["#d3d3d3", "#a3a3a3", "#747474", "#db9381", "#a97264", "#795147", "#e83000", "#b32500", "#801b00"]}, 
+                        {scheme:"theNytimes", colors:["#d3d3d3", "#8eba97", "#449d57", "#caa388", "#888f61", "#417938", "#c17036", "#826226", "#3e5316"]}].map(obj => [obj.scheme, obj.colors]))
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
@@ -35,9 +42,8 @@ Promise.all([
     let ukUrbRural = d3.merge([engUrbRural, scotUrbRural])
     // let ukUrbRural = engUrbRural
 
-
     // console.log(ukUrbRural)
-    renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
+    renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural, vizTheme)
 
     d3.select("#chartCountry").on("change", function(select){
         // d3.selectAll(".AxisLAN").remove()
@@ -47,10 +53,10 @@ Promise.all([
             console.log(country)
 
         if (country==="UK") {
-            renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural)
+            renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural, vizTheme)
 
         } else if (country==="USA") {
-            renderChartUs(hex_us, uSuPd_tot)
+            renderChartUs(hex_us, uSuPd_tot, vizTheme)
         }
     })
     // console.log(hex_us)
@@ -62,8 +68,8 @@ Promise.all([
     new TypeIt("#FigTitle", {
         speed: 150,
         strings: [
-          'A <span class="rich">Rich</span> vs. <span class="poor">Poor</span> issue',
-          'An <span class="rich">urban</span> vs. <span class="poor">rural</span> issue',
+          `A <span class="rich${vizTheme}">Rich</span> vs. <span class="poor${vizTheme}">Poor</span> issue`,
+          `An <span class="rich${vizTheme}">urban</span> vs. <span class="poor${vizTheme}">rural</span> issue`,
         ],
         breakLines: false,
         loop: true,
@@ -71,7 +77,7 @@ Promise.all([
       }).go();
 
 
-    function renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural) {
+    function renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural, vizTheme) {
 
         const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
 
@@ -97,8 +103,8 @@ Promise.all([
         // const grid = d3.select(DOM.svg(figWidth, figHeight+marginTop+marginBottom));
         const grid = d3.select("#chart")
                         .append("svg")
-                        // .attr("preserveAspectRatio", "xMinYMin meet")
-                        // .attr("viewBox", "0 0 300 300")
+                        .attr("preserveAspectRatio", "xMinYMin meet")
+                        // .attr("viewBox", `0 0 ${figWidth} ${figHeight+marginTop+marginBottom}`)
                         // .classed("svg-content", true);
                         // .attr("preserveAspectRatio", "xMidYMid meet")
                         // .attr("viewBox", "0 0 "+ (figWidth+margin.left+margin.right) +"," + (figHeight+marginTop+marginBottom)+"")
@@ -108,13 +114,22 @@ Promise.all([
         const svg = grid
           .append("g")
         //   .attr("preserveAspectRatio", "xMinYMin meet")
-          .attr("viewBox", [0, 0, figWidth, figHeight])
+        //   .attr("viewBox", [0, 0, figWidth, figHeight])
           // .style("overflow", "visible")
           .attr('transform', `translate(${0}, ${marginTop})`)
         
       
-          // bivar settings
-        colors = ["#e8e8e8", "#e4d9ac", "#c8b35a", "#cbb8d7", "#c8ada0", "#af8e53", "#9972af", "#976b82", "#804d36"]
+        // color settings
+        colors = colorSchemes.get(vizTheme)
+        // colors = ["#e8e8e8", "#e4d9ac", "#c8b35a", "#cbb8d7", "#c8ada0", "#af8e53", "#9972af", "#976b82", "#804d36"]
+        // const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
+        const categoriesX = [colors[6], colors[2], colors[4], colors[7], colors[5], colors[3], colors[1], colors[0], colors[8]] 
+        const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
+                                "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
+
+        var sortOrder = [categoriesX[1], categoriesX[6], categoriesX[4], categoriesX[2], categoriesX[7], categoriesX[5], categoriesX[0], categoriesX[3], categoriesX[8]] 
+
+        // bivar settings
         let dataBivar = Object.assign(new Map(ukUpd_tot.map(d=>[d.area_code, [d["workplaces_percent_change_from_baseline"], d["Total annual income (£)"]]])), {title: ["Travel to Work", "Med. Income"]})
         n = Math.floor(Math.sqrt(colors.length))
         yBivar = d3.scaleQuantile(Array.from(dataBivar.values(), d => d[1]), d3.range(n))
@@ -190,30 +205,17 @@ Promise.all([
         
         console.log("urb",ukUrbRural)
         console.log("hex", hexes)
-        //   cluster data for dot clusters
-        //   const clustered = hexes.map(d=>({...d, cluster: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
-        //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
-        //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
-        //                                                     colorBivar([d.mobilityWork, d.income])}))
-                           
-                                                        
-        //   console.log(clustered)
-
-        //   const clusterData = [hexes.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i})),
-        //                        d3.rollups(hexes, v => v.length, d=>d.category).map(d=> { return {category: d[0], category_value: d[1]}}).filter(d=>d.category!=="#ccc")]
         
         //   variables for dot clusters bars
           const clusterData = d3.groups(hexes, v=>v.category).map(d=> { return {category: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}}).filter(d=>d.category!=="#ccc")
 
           console.log(clusterData)
-          const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
-          const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-                                    "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
+        //   const categoriesX = ["#9972af", "#c8b35a", "#c8ada0", "#976b82", "#af8e53", "#cbb8d7", "#e4d9ac", "#e8e8e8", "#804d36"] 
+        //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
+        //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
 
-         var sortOrder = ["#c8b35a", "#e4d9ac", "#af8e53", "#c8ada0", "#e8e8e8", "#cbb8d7", "#9972af", "#976b82", "#804d36"]  
-        //   var sortOrder = ["High Income, Low Travel", "Mid. Income, Low Travel", "High Income, Mid. Travel", "Mid. Income, Mid. Travel", 
-        //                     "Low Income, Low Travel", "Low Income, Mid. Travel", "Low Income, High Travel", "Mid. Income, High Travel", 
-        //                     "High Income, High Travel"]                                                           
+        // //   var sortOrder = ["#c8b35a", "#e4d9ac", "#af8e53", "#c8ada0", "#e8e8e8", "#cbb8d7", "#9972af", "#976b82", "#804d36"]  
+        //   var sortOrder = [categoriesX[1], categoriesX[6], categoriesX[4], categoriesX[2], categoriesX[7], categoriesX[5], categoriesX[0], categoriesX[3], categoriesX[8]]       
           const scaleXCategory = d3.scaleBand().domain(categoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
           const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleY = d3.scaleLinear().domain([0, 85]).range([figHeight- margin.bottom, 0]); 
@@ -235,34 +237,18 @@ Promise.all([
                 })
                 // .map(d=>({...d, data: d.data.sort((a,b)=> d3.descending(a.category,b.category))}))
 
-        //   const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
-        // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
-
-        //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
-
           console.log(ruralData)
         //   console.log("ruralRaw", ukUrbRural)
           const urbCategoriesX = ruralData.sort((a,b)=>b.data.length-a.data.length).map(d=>d.urbCategory)
-        //   urbCategoriesX.push("No Data")
-        //   console.log(urbCategoriesX)
-        //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-        //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+                                                      
           const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
-        //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
         // more categories of urban
         //   const scaleYurb = d3.scaleLinear().domain([0, 115]).range([figHeight- margin.bottom, 0]); 
         // less categories of urban
         const scaleYurb = d3.scaleLinear().domain([0, 285]).range([figHeight-margin.bottom, 0]); 
 
-          
-          
-        //   ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<rect width=${k} height=${k} x=${i * k} y=${(n - 1 - j) * k} fill=${colors[j * n + i]}>
-        //         <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
-        //   ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
-        //       </rect>`)}
 
-          grid.append(legendIndex)
-          // .attr("transform", `translate(550, 500)`);
+        grid.append(legendIndex)
             .attr("transform", `translate(${figWidth*0.91},${figHeight*0.85})`);
 
 
@@ -351,10 +337,6 @@ Promise.all([
           .attr("r", radius)
               .attr("stroke", "#fffae7")
               .attr("stroke-width", "0.5")
-          // .attr("fill", d => boroughIncMob.filter(c=>c.borough_abbr===d.n)[0] === undefined? "#ccc": 
-          //                 colorScale(boroughIncMob.filter(c=>c.borough_abbr===d.n)[0][mapMetric]))
-          // .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined? "#ccc": 
-          //                 colorScale(ukUpd_tot.filter(c=>c.area_code===d.key)[0][mapMetric]))
       
           .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
                             ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
@@ -401,15 +383,6 @@ Promise.all([
                                         hideTooltip()
                                             // .lower()
           })
-      
-        // d3.selectAll(".hex")
-        //   .on("mouseover", function(event, d) {d3.select(this).attr("stroke-width", "3")})
-      
-          // .on("mouseover", (event, d) => d3.select(this).attr("stroke-width", "3"))
-          // .on("mousemove", (event, d) => d3.select(this).attr("stroke-width", "3"))
-          // .on("mouseout", (event, d) => d3.select(this).attr("stroke-width", "1"))
-            
-              // .attr("fill", "#b0e8f0");
       
           // Add the hex codes as labels
           const annot = hexmap
@@ -460,20 +433,7 @@ Promise.all([
                         .attr("font-weight", 500)
                             // .lower()
             })
-        //   .on("mouseover", function(event, d) { 
-        //     d3.select(this)
-            //   .attr("font-size", fontSize*1.5)
-            //   .attr("font-weight", 900)
-        //       // .moveToFront()
-        //     //   d3.select(this.parentNode).raise()
-        //       // .attr("z-index", 1000)
-        // })
-        // .on("mouseleave", function(event, d) { 
-        //     d3.select(this)
-        //     .attr("font-size", fontSize)
-        //     .attr("font-weight", 500)
-        //                 // .lower()
-        // });
+
       
       
         d3.select("#chartView").on("change", function(select){
@@ -892,7 +852,7 @@ Promise.all([
         })
     }
 
-    function renderChartUs(hex_la, ukUpd_tot) {//}, ukUpd_time, ukUrbRural) {
+    function renderChartUs(hex_la, ukUpd_tot, vizTheme) {//}, ukUpd_time, ukUrbRural) {
 
         const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
 
@@ -935,7 +895,14 @@ Promise.all([
         
       
           // bivar settings
-        colors = ["#e8e8e8", "#e4d9ac", "#c8b35a", "#cbb8d7", "#c8ada0", "#af8e53", "#9972af", "#976b82", "#804d36"]
+        colors = colorSchemes.get(vizTheme)
+         
+        const categoriesX = [colors[2], colors[6], colors[7], colors[4], colors[3], colors[5], colors[8], colors[1], colors[0]] 
+        const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, High Travel", "Mid. Income, Mid. Travel", 
+                                "Low Income, Mid. Travel", "High Income, Mid. Travel", "High Income, High Travel", "Mid. Income, Low Travel", "Low Income, Low Travel"]  
+
+        var sortOrder = [categoriesX[0], categoriesX[7], categoriesX[5], categoriesX[3], categoriesX[8], categoriesX[4], categoriesX[1], categoriesX[2], categoriesX[6]]
+
         let dataBivar = Object.assign(new Map(ukUpd_tot.map(d=>[d.area_code, [d["workplaces_percent_change_from_baseline"], d["Total annual income (£)"]]])), {title: ["Travel to Work", "Med. Income"]})
         n = Math.floor(Math.sqrt(colors.length))
         yBivar = d3.scaleQuantile(Array.from(dataBivar.values(), d => d[1]), d3.range(n))
@@ -1004,27 +971,16 @@ Promise.all([
         }))//.filter(d=>d.urbCategory!==null)//.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i}))
         
         console.log("hex", hexes)
-        //   cluster data for dot clusters
-        //   const clustered = hexes.map(d=>({...d, cluster: ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
-        //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
-        //                                                     ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
-        //                                                     colorBivar([d.mobilityWork, d.income])}))
-                           
-                                                        
-        //   console.log(clustered)
-
-        //   const clusterData = [hexes.sort((a, b)=>a.category-b.category).map((d, i) =>({ ...d, row: i})),
-        //                        d3.rollups(hexes, v => v.length, d=>d.category).map(d=> { return {category: d[0], category_value: d[1]}}).filter(d=>d.category!=="#ccc")]
-        
+       
         //   variables for dot clusters bars
           const clusterData = d3.groups(hexes, v=>v.category).map(d=> { return {category: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}}).filter(d=>d.category!=="#ccc")
 
           console.log(clusterData)
-          const categoriesX = ["#c8b35a", "#9972af", "#976b82", "#c8ada0", "#cbb8d7", "#af8e53", "#804d36", "#e4d9ac", "#e8e8e8"] 
-          const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, High Travel", "Mid. Income, Mid. Travel", 
-                                     "Low Income, Mid. Travel", "High Income, High Travel", "High Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel"]  
+        //   const categoriesX = ["#c8b35a", "#9972af", "#976b82", "#c8ada0", "#cbb8d7", "#af8e53", "#804d36", "#e4d9ac", "#e8e8e8"] 
+        //   const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, High Travel", "Mid. Income, Mid. Travel", 
+        //                              "Low Income, Mid. Travel", "High Income, High Travel", "High Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel"]  
 
-         var sortOrder = ["#c8b35a", "#e4d9ac", "#af8e53", "#c8ada0", "#e8e8e8", "#cbb8d7", "#9972af", "#976b82", "#804d36"]  
+        //  var sortOrder = ["#c8b35a", "#e4d9ac", "#af8e53", "#c8ada0", "#e8e8e8", "#cbb8d7", "#9972af", "#976b82", "#804d36"]  
         //   var sortOrder = ["High Income, Low Travel", "Mid. Income, Low Travel", "High Income, Mid. Travel", "Mid. Income, Mid. Travel", 
         //                     "Low Income, Low Travel", "Low Income, Mid. Travel", "Low Income, High Travel", "Mid. Income, High Travel", 
         //                     "High Income, High Travel"]                                                           
@@ -1053,29 +1009,16 @@ Promise.all([
                 })
                 // .map(d=>({...d, data: d.data.sort((a,b)=> d3.descending(a.category,b.category))}))
 
-        //   const ruralData = d3.groups(ukUrbRural, v=>v.RUC11).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
-        // const ruralData = d3.groups(hexes, v=>v.urbCategory).filter(d=>d[0]!==null).map(d=> { return {urbCategory: d[0], data: d[1].map((c, i) =>({ ...c, row: i}))}})
-
-        //   console.log(ukUrbRural.filter(d=>d.LAD11CD==="E08000037"))
 
           console.log("rural", ruralData)
         //   console.log("ruralRaw", ukUrbRural)
           const urbCategoriesX = ruralData.sort((a,b)=>b.data.length-a.data.length).map(d=>d.urbCategory)
-        //   urbCategoriesX.push("No Data")
-        //   console.log(urbCategoriesX)
-        //   const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
-        //                             "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]                                                             
+                               
           const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
         //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
           const scaleYurb = d3.scaleLinear().domain([0, 1530]).range([figHeight- margin.bottom, 0]); 
         // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
 
-          
-          
-        //   ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<rect width=${k} height=${k} x=${i * k} y=${(n - 1 - j) * k} fill=${colors[j * n + i]}>
-        //         <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
-        //   ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
-        //       </rect>`)}
 
           /////////////////////UNCOMMENT
 
@@ -1878,7 +1821,7 @@ Promise.all([
 
         d3.select("#staticTooltip")
           .append("html")
-          .html(`During the COVID-19 Pandemic, residents of the <strong class="rich" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${country==="UK"?data.n: data.fullName}</strong>, traveled to work <strong class="rich" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
+          .html(`During the COVID-19 Pandemic, residents of the <strong class="rich${vizTheme}" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${country==="UK"?data.n: data.fullName}</strong>, traveled to work <strong class="rich${vizTheme}" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
 
     }
 

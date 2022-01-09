@@ -234,14 +234,38 @@ font-family:'Lato', sans-serif;
     text-transform: None;
   }
 
-  .rich {
+  .richoriginal {
     background-color:#cbb35c;
     font-weight:900;
     color:#fffae7
   }
 
-  .poor {
+  .richtheEconomist {
+    background-color:#747474;
+    font-weight:900;
+    color:#fffae7
+  }
+
+  .richtheNytimes {
+    background-color:#449d57;
+    font-weight:900;
+    color:#fffae7
+  }
+
+  .poororiginal {
     background-color:#9c75b4;
+    font-weight:900;
+    color:#fffae7
+  }
+
+  .poortheEconomist {
+    background-color:#e83000;
+    font-weight:900;
+    color:#fffae7
+  }
+
+  .poortheNytimes {
+    background-color:#c17036;
     font-weight:900;
     color:#fffae7
   }
