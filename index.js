@@ -1,11 +1,11 @@
 // d3 = require('d3', "d3-hexjson")
-const vizTheme = "theEconomist"
-// const vizTheme = "theNytimes"
+// const vizTheme = "theEconomist"
+const vizTheme = "theNytimes"
 // const vizTheme = "original"
         // color settings
 const colorSchemes = new Map([{scheme:"original", colors:["#e8e8e8", "#e4d9ac", "#c8b35a", "#cbb8d7", "#c8ada0", "#af8e53", "#9972af", "#976b82", "#804d36"]}, 
                         {scheme:"theEconomist", colors:["#d3d3d3", "#a3a3a3", "#747474", "#db9381", "#a97264", "#795147", "#e83000", "#b32500", "#801b00"]}, 
-                        {scheme:"theNytimes", colors:["#d3d3d3", "#8eba97", "#449d57", "#caa388", "#888f61", "#417938", "#c17036", "#826226", "#3e5316"]}].map(obj => [obj.scheme, obj.colors]))
+                        {scheme:"theNytimes", colors:["#e6e6e6", "#99c5a2", "#47a45b", "#ddb08e", "#939765", "#457e38", "#d5742f", "#8d6421", "#425312"]}].map(obj => [obj.scheme, obj.colors]))
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
@@ -27,7 +27,9 @@ Promise.all([
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
 
     d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType)
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType),
+    // US time data, need to reduce
+    // d3.json("https://gist.githubusercontent.com/lnicoletti/77843584cf6a2d6eb544e7b23eab2910/raw/a0074d2e6005f8f3eed2e2fd5fe616f8e92c18cb/uSUpdGroupMonth.json", d3.autoType)
 
     ]).then((datasets) => {
 
