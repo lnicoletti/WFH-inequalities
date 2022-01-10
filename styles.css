@@ -276,11 +276,24 @@ font-family:'Lato', sans-serif;
     color:#fffae7
   }
 
+  .richHightheNytimes {
+    background-color:rgb(2, 83, 2);
+    font-weight:900;
+    color:#fffae7
+  }
+
   .poorLow {
     background-color:#e8e8e8;
     font-weight:900;
     color:#fffae7
   }
+
+  .poorLowtheNytimes {
+    background-color:#e8e8e8;
+    font-weight:900;
+    color:#fffae7
+  }
+  
 
   .custom-select {
     position: relative;

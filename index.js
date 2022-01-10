@@ -1865,53 +1865,53 @@ Promise.all([
     }
 
     function annotateBars(x, y, category, row, svg, text) {
-        // const type = d3.annotationLabel
+        const type = d3.annotationLabel
 
-        // const annotations = [{
-        // note: {
-        //     label: "Longer text to show text wrapping",
-        //     bgPadding: 20,
-        //     title: "Annotations :)"
-        // },
-        // //can use x, y directly instead of data
-        // data: { category: category, row: row },
-        // className: "show-bg",
-        // dy: 137,
-        // dx: 162
-        // }]
+        const annotations = [{
+        note: {
+            label: "Longer text to show text wrapping",
+            bgPadding: 20,
+            title: "Annotations :)"
+        },
+        //can use x, y directly instead of data
+        data: { category: category, row: row },
+        className: "show-bg",
+        dy: 137,
+        dx: 162
+        }]
 
 
-        // const makeAnnotations = d3.annotation()
-        // .editMode(true)
-        // //also can set and override in the note.padding property
-        // //of the annotation object
-        // .notePadding(15)
-        // .type(type)
-        // //accessors & accessorsInverse not needed
-        // //if using x, y in annotations JSON
-        // .accessors({
-        //     x: d => x(d.category),
-        //     y: d => y(d.row)
-        // })
-        // .accessorsInverse({
-        //     date: d => x.invert(d.x),
-        //     close: d => y.invert(d.y)
-        // })
-        // .annotations(annotations)
+        const makeAnnotations = d3.annotation()
+        .editMode(true)
+        //also can set and override in the note.padding property
+        //of the annotation object
+        .notePadding(15)
+        .type(type)
+        //accessors & accessorsInverse not needed
+        //if using x, y in annotations JSON
+        .accessors({
+            x: d => x(d.category),
+            y: d => y(d.row)
+        })
+        .accessorsInverse({
+            date: d => x.invert(d.x),
+            close: d => y.invert(d.y)
+        })
+        .annotations(annotations)
 
-        // console.log(d3.annotation())
+        console.log(d3.annotation())
 
-        const annotationData = [{ category: category, row: row, text: text}]
+        // const annotationData = [{ category: category, row: row, text: text}]
 
-        // const annotations = 
+        // // const annotations = 
         // d3.select("#chart")//.select("svg")
-        // .data(annotationData)
+        // // .data(annotationData)
         // .append("g")
         // .attr("class", "annotation-group")
-        // .append("text")
-        // .attr("x", d=>x(d.category))
-        // .attr("y", d=>y(d.row))
-        // .text("text", text)
+        // // .append("text")
+        // // .attr("x", d=>x(d.category))
+        // // .attr("y", d=>y(d.row))
+        // // .text(text)
         // .call(makeAnnotations)
     }
 
