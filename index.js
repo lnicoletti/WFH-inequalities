@@ -85,7 +85,6 @@ Promise.all([
         pause: 1000,
       }).go();
 
-
     function renderChartUk(hex_la, ukUpd_tot, ukUpd_time, ukUrbRural, vizTheme) {
 
         const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
@@ -161,7 +160,7 @@ Promise.all([
               <marker id="arrow" markerHeight=10 markerWidth=10 refX=3 refY=3 orient=auto>
                 <path d="M0,0L6,3L0,6Z" />
               </marker>
-              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${radius} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
+              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${radius} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]} class="legendCircle" value=${colors[j * n + i]}>
                 <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
           ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
               </circle>`)}
@@ -172,6 +171,8 @@ Promise.all([
             </g>
           </g>`;
           }
+
+          
           // Render the hexes
           var hexes = d3.renderHexJSON(hex_la, figWidth, figHeight).map(d=> ({ ...d, 
           income: 
@@ -260,6 +261,23 @@ Promise.all([
 
         grid.append(legendIndex)
             .attr("transform", `translate(${figWidth*0.91},${figHeight*0.85})`);
+
+        // legend interaction
+        d3.selectAll(".legendCircle")
+        .on("mouseover", function(event, d) { 
+          const selectedCat = this.attributes.value.value
+          d3.select(this).attr("cursor", "pointer").attr("stroke-width", "1.5")
+          d3.select(this.parentNode).raise()
+          d3.selectAll(".laCircle").filter(d=>d.category!==selectedCat).attr("opacity", 0.2)
+          console.log(selectedCat)
+        })
+        .on("mouseout", function(event, d) { 
+          const selectedCat = this.attributes.value.value
+          d3.select(this).attr("stroke-width", "0.5").moveToBack()
+          d3.selectAll(".laCircle").attr("opacity", 1) //.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")
+          console.log(selectedCat)
+        })
+
 
 
         // axes
@@ -453,13 +471,14 @@ Promise.all([
           if (view==="chart") {
 
             svg.selectAll(".AxisLAN").remove()
+            d3.selectAll(".annotation-group").remove()
 
             circles.filter(d=>d.category==="#ccc")
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
             .attr("cx", 200)
-            .attr("cy", 200)
+            .attr("cy", 1000)
             .attr("opacity", 0)
 
             annot.filter(d=>d.category==="#ccc")
@@ -467,7 +486,7 @@ Promise.all([
            .duration(750)
            .ease(d3.easeLinear)
             .attr("x", 200)
-            .attr("y", 200)
+            .attr("y", 1000)
             .attr("opacity", 0)
       
             circles.filter(d=>d.category!=="#ccc")
@@ -512,6 +531,8 @@ Promise.all([
           } else if (view==="map"){
       
             svg.selectAll(".AxisLAN").remove()
+            d3.selectAll(".annotation-group").remove()
+            
             circles
                .transition()
               .duration(750)
@@ -541,6 +562,7 @@ Promise.all([
 
           } else if (view==="bars"){
 
+            d3.selectAll(".annotation-group").remove()
             // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
 
             const pctLH = (circles.filter(d=>d.category==="#e8e8e8")._groups[0].length/circles._groups[0].length*100).toFixed()+"%"
@@ -559,7 +581,7 @@ Promise.all([
            .duration(750)
            .ease(d3.easeLinear)
            .attr("cx", 200)
-           .attr("cy", 500)
+           .attr("cy", 1000)
            .attr("opacity", 0)
 
             annot.filter(d=>d.category==="#ccc")
@@ -567,7 +589,7 @@ Promise.all([
            .duration(750)
            .ease(d3.easeLinear)
            .attr("x", 200)
-           .attr("y", 500)
+           .attr("y", 1000)
            .attr("opacity", 0)
 
             circles.filter(d=>d.category!=="#ccc")//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
@@ -661,9 +683,19 @@ Promise.all([
                   .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
               }, 0);
 
-            annotateBars(scaleXCategory, scaleY, categoriesX[0], 200, svg, "Low income high travel and high income low travel account for 50% of areas")
+            annotateBars(scaleXCategory, 
+                         scaleY, 
+                         categoriesX[0], 
+                         78, 
+                         grid, 
+                         "50% of localities are either low income, high travel or high income, low travel", 
+                         scaleXCategory.bandwidth()*1.3,
+                         30,
+                         162)
 
             } else if (view==="barsUrban"){
+
+              d3.selectAll(".annotation-group").remove()
 
                 // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
     
@@ -709,7 +741,7 @@ Promise.all([
                .duration(750)
                .ease(d3.easeLinear)
                .attr("cx", 200)
-               .attr("cy", 500)
+               .attr("cy", 1000)
                .attr("opacity", 0)
     
                 annot.filter(d=>d.urbCategory===null||d.category==="#ccc")
@@ -717,7 +749,7 @@ Promise.all([
                .duration(750)
                .ease(d3.easeLinear)
                .attr("x", 200)
-               .attr("y", 500)
+               .attr("y", 1000)
                .attr("opacity", 0)
     
                 circles.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
@@ -872,6 +904,17 @@ Promise.all([
                         .attr("class", "legend")
                       .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
                   }, 0);
+
+
+                annotateBars(scaleXurbCategory, 
+                             scaleYurb, 
+                             "Urban", 
+                             78, 
+                             grid, 
+                             "The majority of low income, high travel and high income, low travel localities are located in urban areas", 
+                             scaleXurbCategory.bandwidth(),
+                             -40,
+                             50)
     
               }
         })
@@ -951,7 +994,7 @@ Promise.all([
               <marker id="arrow" markerHeight=10 markerWidth=10 refX=3 refY=3 orient=auto>
                 <path d="M0,0L6,3L0,6Z" />
               </marker>
-              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${10} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]}>
+              ${d3.cross(d3.range(n), d3.range(n)).map(([i, j]) => svgDraw`<circle r=${10} cx=${(i * k)+k/2} cy=${((n - 1 - j) * k)+k/2} fill=${colors[j * n + i]} class="legendCircle" value=${colors[j * n + i]}>
                 <title>${dataBivar.title[0]}${labels[j] && ` (${labels[j]})`}
           ${dataBivar.title[1]}${labels[i] && ` (${labels[i]})`}</title>
               </circle>`)}
@@ -1053,6 +1096,22 @@ Promise.all([
           // .attr("transform", `translate(550, 500)`);
             .attr("transform", `translate(${figWidth*0.91},${figHeight*0.85})`);
 
+
+        // legend interaction
+        d3.selectAll(".legendCircle")
+        .on("mouseover", function(event, d) { 
+          const selectedCat = this.attributes.value.value
+          d3.select(this).attr("cursor", "pointer").attr("stroke-width", "1.5")
+          d3.select(this.parentNode).raise()
+          d3.selectAll(".laCircle").filter(d=>d.category!==selectedCat).attr("opacity", 0.2)
+          console.log(selectedCat)
+        })
+        .on("mouseout", function(event, d) { 
+          const selectedCat = this.attributes.value.value
+          d3.select(this).attr("stroke-width", "0.5").moveToBack()
+          d3.selectAll(".laCircle").attr("opacity", 1) //.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")
+          console.log(selectedCat)
+        })
 
         // axes
         const xScaleInc = d3.scaleLinear()//d3.scaleSymlog()//
@@ -1199,72 +1258,6 @@ Promise.all([
                                             // .lower()
           })
       
-       
-      
-          // Add the hex codes as labels
-        //   const annot = hexmap
-        //       .append("text")
-        //   .attr("x", function(hex) {return hex.x;})
-        //   .attr("y", function(hex) {return hex.y+1;})
-        //       // .append("tspan")
-        //       .attr("text-anchor", "middle")
-        //   .attr('class', 'LStextUK')
-        //   .attr('font-size', fontSize)
-        //   // .attr('font-size', 3*figScale)
-        //   .attr('fill', 'rgb(255,255,255)')
-        //   .attr("z-index", 10)
-        //   .text(function(hex) {return hex.n.slice(0,3);})
-        //   .attr("cursor", "pointer")
-        //   .on("mouseover", function(event, d) { 
-        //     //   d3.select(this)
-        //     //     .attr("stroke-width", "1.5")
-        //     //     .attr("r", radius*2)
-        //     //     // .moveToFront()
-        //     d3.select(this.parentNode).raise()
-        //     //     // .attr("z-index", 1000)
-
-        //     // console.log(d3.select(this.parentNode))
-        //     //     .attr("font-size", fontSize*1.5)
-        //     //     .attr("font-weight", 900)
-
-        //     circles.filter(c=>c.key===d.key)
-        //         .attr("stroke-width", "1.5")
-        //         .attr("r", radiusHover)
-            
-        //     annot.filter(c=>c.key===d.key)
-        //     .attr("font-size", fontSize*2)
-        //     .style("text-transform", "uppercase")
-        //     .attr("font-weight", 700)
-        //     showTooltip(d, "", categoryLabels, categoriesX, "USA")
-        //         // .raise()
-        //     })
-        //     .on("mouseleave", function(event, d) { 
-        //             circles.filter(c=>c.key===d.key)
-        //                     .attr("stroke-width", "0.5")
-        //                     .attr("r", radius)
-        //                     .moveToBack()
-
-        //                 annot.filter(c=>c.key===d.key)
-        //                 .attr("font-size", fontSize)
-        //                 .style("text-transform", "capitalize")
-        //                 .attr("font-weight", 500)
-        //                     // .lower()
-        //     })
-        //   .on("mouseover", function(event, d) { 
-        //     d3.select(this)
-            //   .attr("font-size", fontSize*1.5)
-            //   .attr("font-weight", 900)
-        //       // .moveToFront()
-        //     //   d3.select(this.parentNode).raise()
-        //       // .attr("z-index", 1000)
-        // })
-        // .on("mouseleave", function(event, d) { 
-        //     d3.select(this)
-        //     .attr("font-size", fontSize)
-        //     .attr("font-weight", 500)
-        //                 // .lower()
-        // });
-      
       
         d3.select("#chartView").on("change", function(select){
           var view = d3.select("#chartView").node().value
@@ -1273,13 +1266,14 @@ Promise.all([
           if (view==="chart") {
 
             svg.selectAll(".AxisLAN").remove()
+            d3.selectAll(".annotation-group").remove()
 
             circles.filter(d=>d.category==="#ccc")//||d.mobilityWork===0
             .transition()
            .duration(750)
            .ease(d3.easeLinear)
             .attr("cx", 200)
-            .attr("cy", 200)
+            .attr("cy", 1000)
             .attr("opacity", 0)
 
         //     annot.filter(d=>d.category==="#ccc")
@@ -1336,6 +1330,8 @@ Promise.all([
           } else if (view==="map"){
       
             svg.selectAll(".AxisLAN").remove()
+            d3.selectAll(".annotation-group").remove()
+
             circles
                .transition()
               .duration(750)
@@ -1363,6 +1359,8 @@ Promise.all([
             //   .attr("opacity", 1)
 
           } else if (view==="bars"){
+
+            d3.selectAll(".annotation-group").remove()
 
             // #c8b35a
             // "#804d36", "#e8e8e8"
@@ -1395,7 +1393,7 @@ Promise.all([
            .duration(750)
            .ease(d3.easeLinear)
            .attr("cx", 200)
-           .attr("cy", 500)
+           .attr("cy", 1000)
            .attr("opacity", 0)
 
         //     annot.filter(d=>d.category==="#ccc")
@@ -1505,8 +1503,20 @@ Promise.all([
                     .attr("class", "legend")
                   .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
               }, 0);
+              
+            annotateBars(scaleXCategory, 
+              scaleY, 
+              categoriesX[0], 
+              460, 
+              grid, 
+              "30% of localities are either low income, high travel or high income, low travel", 
+              scaleXCategory.bandwidth()*1.75,
+              15,
+              170)
 
             } else if (view==="barsUrban"){
+
+              d3.selectAll(".annotation-group").remove()
 
                 // console.log((circles.filter(d=>d.category==="#9972af")._groups[0].length/circles._groups[0].length*100).toFixed()+"%")
     
@@ -1559,7 +1569,7 @@ Promise.all([
                .duration(750)
                .ease(d3.easeLinear)
                .attr("cx", 200)
-               .attr("cy", 500)
+               .attr("cy", 1000)
                .attr("opacity", 0)
     
             //     annot.filter(d=>d.urbCategory===null)
@@ -1713,125 +1723,6 @@ Promise.all([
                 // transitionCircles(circles.filter(d=>d.urbCategory!==null&&sortOrder[8].includes(d.category)))
 
                 // console.log(circles.filter(d=>d.urbCategory===null&&d!==undefined))
-    
-            //     circles.filter(d=>d.urbCategory!==null&&colors.includes(d.category))//.on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
-    
-            //     .transition()
-            //     .delay((d, i) => {
-            //     return i * Math.random() * 1.5;
-            //     })
-            //     .duration(5000)
-            // //     .transition()
-            // //    .duration(2000)
-            // //    .ease(d3.easeLinear)
-
-            //     .attr("cx", (d, i)=> //console.log(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0]))
-            //                         numTwentysix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+225:
-            //                         numTwentyfive.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+216:
-            //                         numTwentyfour.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+207:
-            //                         numTwentythree.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+198:
-            //                         numTwentytwo.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+189:
-            //                         numTwentyone.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+180:
-            //                         numTwenties.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+171:
-            //                         numNineteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+162:
-            //                         numEighteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+153:
-            //                         numSeventeens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+144:
-            //                         numSixteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+135:
-            //                         numFifteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+126:
-            //                         numFourteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+117:
-            //                         numThirteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+108:
-            //                         numTwelves.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+99:
-            //                         numElevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+90:
-            //                         numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+81:
-            //                         numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+72:
-            //                         numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+63:
-            //                         numSevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+54:
-            //                         numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+45:
-            //                         numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+36:
-            //                         numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+27:
-            //                         numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+18:
-            //                         numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleXurbCategory(d.urbCategory)+9:
-            //                         scaleXurbCategory(d.urbCategory))
-    
-            //     .attr("cy", (d, i)=>
-            //                         numTwentysix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row):
-            //                         numTwentyfive.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+1):
-            //                         numTwentyfour.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+2):
-            //                         numTwentythree.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+3):
-            //                         numTwentytwo.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+4):
-            //                         numTwentyone.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+5):
-            //                         numTwenties.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+6):
-            //                         numNineteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+7):
-            //                         numEighteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+8):
-            //                         numSeventeens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+9):
-            //                         numSixteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+10):
-            //                         numFifteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+11):
-            //                         numFourteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+12):
-            //                         numThirteens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+13):
-            //                         numTwelves.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+14):
-            //                         numElevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+15):
-            //                         numTens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+16):
-            //                         numNines.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+17):
-            //                         numEights.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+18):
-            //                         numSevens.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+19):
-            //                         numSix.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+20):
-            //                         numFives.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+21):
-            //                         numFours.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+22):
-            //                         numThrees.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+23):
-            //                         numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+24):
-            //                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+25))
-
-
 
                 let barAxis = svg.append("g")
                 .call(xAxisBarsUrb)
@@ -1847,6 +1738,26 @@ Promise.all([
                         .attr("class", "legend")
                       .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
                   }, 0);
+
+                annotateBars(scaleXurbCategory, 
+                  scaleYurb, 
+                  "Rural", 
+                  250, 
+                  grid, 
+                  "In contrast with the U.K., in the U.S. the majority of low income, high travel areas are rural", 
+                  scaleXurbCategory.bandwidth(),
+                  -40,
+                  50)
+
+                annotateBars(scaleXurbCategory, 
+                  scaleYurb, 
+                  "Rural", 
+                  250, 
+                  grid, 
+                  "While the majority of high income, low travel localities are urban", 
+                  scaleXurbCategory.bandwidth()*1.6,
+                  40,
+                  -50)
     
               }
         })
@@ -1864,25 +1775,30 @@ Promise.all([
 
     }
 
-    function annotateBars(x, y, category, row, svg, text) {
+    function annotateBars(x, y, category, row, svg, text, offset, yOffset, xOffset) {
+        // console.log(y)
         const type = d3.annotationLabel
 
         const annotations = [{
         note: {
-            label: "Longer text to show text wrapping",
-            bgPadding: 20,
-            title: "Annotations :)"
+            label: text,
+            bgPadding: 10,
+            // title: text
+        },
+        connector: {
+          end: "dot",
+          // type: "curve",
         },
         //can use x, y directly instead of data
-        data: { category: category, row: row },
+        data: {category: category, row: row},
         className: "show-bg",
-        dy: 137,
-        dx: 162
+        dy: yOffset,
+        dx: xOffset
         }]
 
 
         const makeAnnotations = d3.annotation()
-        .editMode(true)
+        // .editMode(true)
         //also can set and override in the note.padding property
         //of the annotation object
         .notePadding(15)
@@ -1890,29 +1806,34 @@ Promise.all([
         //accessors & accessorsInverse not needed
         //if using x, y in annotations JSON
         .accessors({
-            x: d => x(d.category),
+            x: d => x(d.category)+offset,
             y: d => y(d.row)
         })
-        .accessorsInverse({
-            date: d => x.invert(d.x),
-            close: d => y.invert(d.y)
-        })
+        // .accessorsInverse({
+        //     category: d => x.invert(d.x),
+        //     row: d => y.invert(d.y)
+        // })
         .annotations(annotations)
 
-        console.log(d3.annotation())
+        // console.log(d3.annotation())
 
         // const annotationData = [{ category: category, row: row, text: text}]
 
         // // const annotations = 
         // d3.select("#chart")//.select("svg")
         // // .data(annotationData)
-        // .append("g")
-        // .attr("class", "annotation-group")
-        // // .append("text")
-        // // .attr("x", d=>x(d.category))
-        // // .attr("y", d=>y(d.row))
-        // // .text(text)
-        // .call(makeAnnotations)
+        svg.append("g")
+        .attr("class", "annotation-group")
+        .style("font-size", "15px")
+        // .append("text")
+        // .attr("x", d=>x(d.category))
+        // .attr("y", d=>y(d.row))
+        // .text(text)
+        .call(makeAnnotations)
+        // .transition().duration(1000)
+        // .attr("transform", `translate(${x.bandwidth()}, 0)`)
+
+        d3.selectAll(".annotation-group").attr("opacity", 0).transition().duration(1000).attr("opacity", 1)
     }
 
     function hideTooltip() {
