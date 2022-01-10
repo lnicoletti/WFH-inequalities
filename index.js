@@ -7,6 +7,13 @@ const colorSchemes = new Map([{scheme:"original", colors:["#e8e8e8", "#e4d9ac", 
                         {scheme:"theEconomist", colors:["#d3d3d3", "#a3a3a3", "#747474", "#db9381", "#a97264", "#795147", "#e83000", "#b32500", "#801b00"]}, 
                         {scheme:"theNytimes", colors:["#e6e6e6", "#99c5a2", "#47a45b", "#ddb08e", "#939765", "#457e38", "#d5742f", "#8d6421", "#425312"]}].map(obj => [obj.scheme, obj.colors]))
 
+
+// if (vizTheme=== "theNytimes"||vizTheme=== "theEconomist") {
+//     d3.select("body").style("background-color", "white")
+//     d3.select("#chartView").style("background-color", "white")
+//     d3.select("#chartCountry").style("background-color", "white")
+// }
+
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
     d3.json("https://gist.githubusercontent.com/lnicoletti/9be9db8307920b88fe71d5ec304e0fa3/raw/64881a3e2e97ef5cb15c6768e4b401c8018ec39a/ukUpd_tot_final.json"),
@@ -129,7 +136,8 @@ Promise.all([
         const categoryLabels = ["Low Income, High Travel", "High Income, Low Travel", "Mid. Income, Mid. Travel", "Mid. Income, High Travel", 
                                 "High Income, Mid. Travel", "Low Income, Mid. Travel", "Mid. Income, Low Travel", "Low Income, Low Travel", "High Income, High Travel"]  
 
-        var sortOrder = [categoriesX[1], categoriesX[6], categoriesX[4], categoriesX[2], categoriesX[7], categoriesX[5], categoriesX[0], categoriesX[3], categoriesX[8]] 
+        // var sortOrder = [categoriesX[1], categoriesX[6], categoriesX[4], categoriesX[2], categoriesX[7], categoriesX[5], categoriesX[0], categoriesX[3], categoriesX[8]] 
+        var sortOrder = [categoriesX[1], categoriesX[0], categoriesX[4], categoriesX[2], categoriesX[7], categoriesX[5], categoriesX[6], categoriesX[3], categoriesX[8]] 
 
         // bivar settings
         let dataBivar = Object.assign(new Map(ukUpd_tot.map(d=>[d.area_code, [d["workplaces_percent_change_from_baseline"], d["Total annual income (£)"]]])), {title: ["Travel to Work", "Med. Income"]})
@@ -470,6 +478,10 @@ Promise.all([
               .attr("cx", d => xScaleInc(d[xVar]))
               .attr("cy", d=> yScaleMob(d[yVar]))
               .attr("opacity", d=>d.income!==null?1:0)
+              .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
+                            colorBivar([d.mobilityWork, d.income]))
 
       
             annot.filter(d=>d.category!=="#ccc")
@@ -511,6 +523,10 @@ Promise.all([
               .attr("cy", function(hex) {return hex.y;})
               .attr("r", radius)
               .attr("opacity", 1)
+              .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
+                            colorBivar([d.mobilityWork, d.income]))
       
              annot
                .transition()
@@ -605,6 +621,10 @@ Promise.all([
         //    .attr("cy", figHeight-marginTop)
            .attr("r", radius)
            .attr("opacity", d=>d.income!==null?1:0)
+           .attr("fill", d => ukUpd_tot.filter(c=>c.area_code===d.key)[0] === undefined ? "#ccc": 
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === null? "#ccc":
+                            ukUpd_tot.filter(c=>c.area_code===d.key)[0]["Total annual income (£)"] === undefined ? "#ccc":        
+                            colorBivar([d.mobilityWork, d.income]))
 
            annot.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
@@ -625,7 +645,7 @@ Promise.all([
                                 numTwos.includes(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row)?
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+1):
                                 scaleY(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row+2))
-            .attr("opacity", d=>d.income!==null?1:0)                                
+            .attr("opacity", d=>d.income!==null?1:0)                              
 
             let barAxis = svg.append("g")
             .call(xAxisBars)
@@ -640,6 +660,8 @@ Promise.all([
                     .attr("class", "legend")
                   .call(wrap, scaleXCategory.bandwidth()*1.5, 0)
               }, 0);
+
+            annotateBars(scaleXCategory, scaleY, categoriesX[0], 200, svg, "Low income high travel and high income low travel account for 50% of areas")
 
             } else if (view==="barsUrban"){
 
@@ -769,6 +791,7 @@ Promise.all([
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+8):
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+9))
 
+            .attr("fill", d=>[categoriesX[1], categoriesX[0]].includes(d.category)?colorBivar([d.mobilityWork, d.income]):"#ccc")
             //    .attr("opacity", d=>d.income!==null?1:0)
     
                annot.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
@@ -903,7 +926,9 @@ Promise.all([
         const categoryLabels = ["High Income, Low Travel", "Low Income, High Travel", "Mid. Income, High Travel", "Mid. Income, Mid. Travel", 
                                 "Low Income, Mid. Travel", "High Income, Mid. Travel", "High Income, High Travel", "Mid. Income, Low Travel", "Low Income, Low Travel"]  
 
-        var sortOrder = [categoriesX[0], categoriesX[7], categoriesX[5], categoriesX[3], categoriesX[8], categoriesX[4], categoriesX[1], categoriesX[2], categoriesX[6]]
+        // var sortOrder = [categoriesX[0], categoriesX[7], categoriesX[5], categoriesX[3], categoriesX[8], categoriesX[4], categoriesX[1], categoriesX[2], categoriesX[6]]
+
+        var sortOrder = [categoriesX[0], categoriesX[1], categoriesX[5], categoriesX[3], categoriesX[8], categoriesX[4], categoriesX[7], categoriesX[2], categoriesX[6]]
 
         let dataBivar = Object.assign(new Map(ukUpd_tot.map(d=>[d.area_code, [d["workplaces_percent_change_from_baseline"], d["Total annual income (£)"]]])), {title: ["Travel to Work", "Med. Income"]})
         n = Math.floor(Math.sqrt(colors.length))
@@ -1272,6 +1297,9 @@ Promise.all([
       
               .attr("cx", d => xScaleInc(d[xVar]))
               .attr("cy", d=> yScaleMob(d[yVar]))
+              .attr("fill", d => d.mobilityWork===null?"#ccc": 
+                             d.income===null?"#ccc":      
+                            colorBivar([d.mobilityWork, d.income]))
             //   .attr("transform", function(hex) {
                   // 	return "translate(" + (-hex.x) + "," + (-hex.y) + ")";
                   // })
@@ -1283,8 +1311,8 @@ Promise.all([
             //   .duration(750)
             //   .ease(d3.easeLinear)
       
-              .attr("x", d => xScaleInc(d[xVar]))
-              .attr("y", d=> yScaleMob(d[yVar]))
+            //   .attr("x", d => xScaleInc(d[xVar]))
+            //   .attr("y", d=> yScaleMob(d[yVar]))
             //   .attr("opacity", 0)
               
               // .attr("transform", d => `translate(${xScaleIncome(d["income"])},
@@ -1319,6 +1347,9 @@ Promise.all([
               .attr("cy", function(hex) {return yScaleHex(hex.y);})
               .attr("r", radius)
               .attr("opacity", 1)
+              .attr("fill", d => d.mobilityWork===null?"#ccc": 
+                             d.income===null?"#ccc":      
+                            colorBivar([d.mobilityWork, d.income]))
       
             //  annot
             //    .transition()
@@ -1436,6 +1467,10 @@ Promise.all([
         //    .attr("cy", figHeight-marginTop)
            .attr("r", radius)
            .attr("opacity", d=>d.income!==null?1:0)
+           .attr("fill", d => d.mobilityWork===null?"#ccc": 
+                             d.income===null?"#ccc":      
+                            colorBivar([d.mobilityWork, d.income]))
+
 
         //    annot.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
 
@@ -1661,6 +1696,8 @@ Promise.all([
                                         numTwos.includes(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row)?
                                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+24):
                                         scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.fullName===d.fullName)[0].row+25))
+                    .attr("fill", d=>[categoriesX[1], categoriesX[0]].includes(d.category)?colorBivar([d.mobilityWork, d.income]):"#ccc")
+
                 }
 
                 transitionCircles(circles.filter(d=>d.urbCategory!==null&&sortOrder.includes(d.category)))
@@ -1825,6 +1862,57 @@ Promise.all([
           .append("html")
           .html(`During the COVID-19 Pandemic, residents of the <strong class="rich${vizTheme}" style="background-color:${data.category}">${categoryLabels[categoriesX.indexOf(data.category)].split(",")[0]}</strong> locality of <strong>${country==="UK"?data.n: data.fullName}</strong>, traveled to work <strong class="rich${vizTheme}" style="background-color:${data.category}">${data.mobilityWork*-1}% less</strong> than in 2019.`)
 
+    }
+
+    function annotateBars(x, y, category, row, svg, text) {
+        // const type = d3.annotationLabel
+
+        // const annotations = [{
+        // note: {
+        //     label: "Longer text to show text wrapping",
+        //     bgPadding: 20,
+        //     title: "Annotations :)"
+        // },
+        // //can use x, y directly instead of data
+        // data: { category: category, row: row },
+        // className: "show-bg",
+        // dy: 137,
+        // dx: 162
+        // }]
+
+
+        // const makeAnnotations = d3.annotation()
+        // .editMode(true)
+        // //also can set and override in the note.padding property
+        // //of the annotation object
+        // .notePadding(15)
+        // .type(type)
+        // //accessors & accessorsInverse not needed
+        // //if using x, y in annotations JSON
+        // .accessors({
+        //     x: d => x(d.category),
+        //     y: d => y(d.row)
+        // })
+        // .accessorsInverse({
+        //     date: d => x.invert(d.x),
+        //     close: d => y.invert(d.y)
+        // })
+        // .annotations(annotations)
+
+        // console.log(d3.annotation())
+
+        const annotationData = [{ category: category, row: row, text: text}]
+
+        // const annotations = 
+        // d3.select("#chart")//.select("svg")
+        // .data(annotationData)
+        // .append("g")
+        // .attr("class", "annotation-group")
+        // .append("text")
+        // .attr("x", d=>x(d.category))
+        // .attr("y", d=>y(d.row))
+        // .text("text", text)
+        // .call(makeAnnotations)
     }
 
     function hideTooltip() {
