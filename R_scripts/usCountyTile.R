@@ -18,7 +18,8 @@ names(states)[2] = "STATEFP"
 
 # # filter for only contiguous (without hawai and alaska)
 # original_shapes <- filter(original_shapes, STATE_FIPS!=02 & STATE_FIPS!=15)
-original_shapes <- st_transform(original_shapes, 3857)
+# original_shapes <- st_transform(original_shapes, 3857)
+original_shapes <- st_transform(original_shapes, 5070)
 # keep only counties that are adjacent
 # st_rook = function(a, b = a) st_relate(a, b, pattern = "F***1****")
 # original_shapes %>% mutate(NB_ROOK = st_rook(.))
@@ -41,6 +42,7 @@ ggplot(tile) +
 
 
 # tileLonLat <- st_transform(st_centroid(tile$geometry), 4326)
+# tile <- st_transform(tile, 3338)
 
 tile$centroid = st_transform(st_centroid(tile$tile_map), 4326)
 # tile$centroid = st_centroid(st_transform(tile$tile_map, 4326))
@@ -63,7 +65,7 @@ names(df_final)[4] = "abbrv"
 
 # save data
 # st_write(tile, "processed/florida.geojson", driver = "GeoJSON")
-write.csv(x = df_final, file = 'processed/USA_countyTiles_square.csv')
+write.csv(x = df_final, file = 'processed/USA_countyTiles_square_albers.csv')
 
 
 # tile_map = generate_map(governors$geometry, square = FALSE, flat_topped = TRUE)

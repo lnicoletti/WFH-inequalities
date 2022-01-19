@@ -42,7 +42,7 @@ Promise.all([
     // new hexes
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/866f91b3aa45e5d26412bc57c199b333/raw/4597f9f3c161849af6d2c4d64b766b23087e286f/usCountiesHex_tilemaps.csv", d3.autoType),
     // square:
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/c30612158be0229fe7dbc1f5c6a1392d/raw/f78be8c9b94a68194aea7fcaaef3a09c19482ce5/usCountiesSquare_tilemaps_fixed.csv"),
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/a01622da3e106830fe1c51ab96403234/raw/2b0d35c4efff50a65beb29759ae1a55eb99f73ac/usCountiesHex_tilemaps_albers.csv"),
     // US time data, need to reduce
     // d3.json("https://gist.githubusercontent.com/lnicoletti/77843584cf6a2d6eb544e7b23eab2910/raw/a0074d2e6005f8f3eed2e2fd5fe616f8e92c18cb/uSUpdGroupMonth.json", d3.autoType)
 
@@ -1159,7 +1159,7 @@ Promise.all([
                     }
                 }) }
 
-        var projection = d3.geoMercator()
+        var projection = d3.geoAlbersUsa()
         // .center([-96.5795, 39.828175])
         // .scale(850)
         .fitSize([figWidth-margin.right-margin.left, figHeight-margin.top-margin.bottom], featureCollection);
