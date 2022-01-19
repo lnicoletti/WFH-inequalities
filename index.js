@@ -16,7 +16,7 @@ const colorSchemes = new Map([{scheme:"original", colors:["#e8e8e8", "#e4d9ac", 
 
 Promise.all([
     d3.json("https://raw.githubusercontent.com/odileeds/hexmaps/gh-pages/maps/uk-local-authority-districts-2021.hexjson"),
-    d3.json("https://gist.githubusercontent.com/lnicoletti/9be9db8307920b88fe71d5ec304e0fa3/raw/64881a3e2e97ef5cb15c6768e4b401c8018ec39a/ukUpd_tot_final.json"),
+    d3.json("https://gist.githubusercontent.com/lnicoletti/2e08ca8357c8d4e4cf9bf869d890ab99/raw/a8135c1175715c9d8715be58de2ce8752fe236a4/ukUpd_tot_final_reduced.json"),
     d3.json("https://gist.githubusercontent.com/lnicoletti/8025f10314c9004f5c0d9e392bbf5b17/raw/f5fa0d5c86d1b8d41f9ed6624d6b23b0b1b2ec37/ukUpdGroupMonth"),
     
     // uk urb rural
@@ -33,8 +33,16 @@ Promise.all([
     d3.csv("https://gist.githubusercontent.com/lnicoletti/1117ef6f526534506e96f981758a5602/raw/e0611a8a1ce43b9debb8c04465d8a67a054e6b2c/urbanRuralScotland_2class.csv", d3.autoType),
     // d3.csv("https://gist.githubusercontent.com/lnicoletti/6e16123616cf30fb88bf3b217d98f398/raw/314fea2e2a9fd778543a8dcf195bc0f845c57730/urbanRuralScotland.csv", d3.autoType),
 
-    d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
-    d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType),
+    // old data with naming problem
+    // d3.json("https://gist.githubusercontent.com/lnicoletti/4f576610004076d7b8f0e7b7ec0d08c5/raw/67ed1b2e38d5678808ad9ad4ce3e9309a83deb6d/usUpd_tot.json", d3.autoType),
+    // new data with correct naming
+    d3.json("https://gist.githubusercontent.com/lnicoletti/abbd577e047a3f501430869a2b6833ca/raw/2de81f38eaf396c5c2d1d75901660c9f86b10e64/usUpd_tot_fixed_reduced.json", d3.autoType),
+    // old hexes
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/62ee1b2144ad7dbcd6a66eddbc1b0544/raw/6cd8ed474e719767f40e7de88e02b6815b1e0d03/usCountiesHex.csv", d3.autoType),
+    // new hexes
+    // d3.csv("https://gist.githubusercontent.com/lnicoletti/866f91b3aa45e5d26412bc57c199b333/raw/4597f9f3c161849af6d2c4d64b766b23087e286f/usCountiesHex_tilemaps.csv", d3.autoType),
+    // square:
+    d3.csv("https://gist.githubusercontent.com/lnicoletti/c30612158be0229fe7dbc1f5c6a1392d/raw/f78be8c9b94a68194aea7fcaaef3a09c19482ce5/usCountiesSquare_tilemaps_fixed.csv"),
     // US time data, need to reduce
     // d3.json("https://gist.githubusercontent.com/lnicoletti/77843584cf6a2d6eb544e7b23eab2910/raw/a0074d2e6005f8f3eed2e2fd5fe616f8e92c18cb/uSUpdGroupMonth.json", d3.autoType)
 
@@ -824,6 +832,8 @@ Promise.all([
                                     scaleYurb(ruralData.filter(c=>c.urbCategory===d.urbCategory)[0].data.filter(e=>e.LAD11CD===d.key)[0].row+9))
 
             .attr("fill", d=>[categoriesX[1], categoriesX[0]].includes(d.category)?colorBivar([d.mobilityWork, d.income]):"#ccc")
+            // .attr("opacity", d=>[categoriesX[1], categoriesX[0]].includes(d.category)?1:0.3)
+
             //    .attr("opacity", d=>d.income!==null?1:0)
     
                annot.filter(d=>d.urbCategory!==null&&d.category!=="#ccc")//.filter(d=>d.category!=="#ccc").on("click", (event, d)=>console.log(clusterData.filter(c=>c.category===d.category)[0].data.filter(e=>e.key===d.key)[0].row))
@@ -920,9 +930,9 @@ Promise.all([
         })
     }
 
-    function renderChartUs(hex_la, ukUpd_tot, vizTheme) {//}, ukUpd_time, ukUrbRural) {
+    function renderChartUs(hex_la, ukUpd_tot, vizTheme) { //}, ukUpd_time, ukUrbRural) {
 
-        const margin = ({ top: 20, right: 20, bottom: 20, left: 57.5})
+        const margin = ({ top: 20, right: 40, bottom: 20, left: 20})
 
         const marginTop = 5
         const marginBottom = 40
@@ -930,10 +940,10 @@ Promise.all([
         // const figScale = 2.1
         // const figWidth = width
         // const figHeight = height*figScale
-        const figWidth = 850
+        const figWidth = 880
         const scatterWidth = figWidth-100
-        const figHeight = 540
-        const radius = 4.3//10//9.8
+        const figHeight = 580
+        const radius = 4.2//10//9.8
         const radiusHover = radius*2
         const boundWidth = 4
         const fontSize = 6.5
@@ -951,15 +961,20 @@ Promise.all([
                         // .classed("svg-content", true);
                         // .attr("preserveAspectRatio", "xMidYMid meet")
                         // .attr("viewBox", "0 0 "+ (figWidth+margin.left+margin.right) +"," + (figHeight+marginTop+marginBottom)+"")
-                        .attr("width", figWidth)
-                        .attr("height", figHeight+marginTop+marginBottom)
+                        
+                        // .attr("width", figWidth)
+                        .attr("width", figWidth+margin.right+margin.left)
+                        // .attr("height", figHeight+marginTop+marginBottom)
+                        .attr("height", figHeight+margin.top+margin.bottom)
+
       
         const svg = grid
           .append("g")
         //   .attr("preserveAspectRatio", "xMinYMin meet")
           .attr("viewBox", [0, 0, figWidth, figHeight])
           // .style("overflow", "visible")
-          .attr('transform', `translate(${0}, ${marginTop})`)
+          .attr('transform', `translate(${margin.left}, ${margin.top})`)
+          // .attr('transform', `translate(${0}, ${marginTop})`)
         
       
           // bivar settings
@@ -1086,7 +1101,7 @@ Promise.all([
                                
           const scaleXurbCategory = d3.scaleBand().domain(urbCategoriesX).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);  
         //   const scaleXCategoryLabels = d3.scaleBand().domain(categoryLabels).range([margin.left, scatterWidth - margin.right]).paddingInner([0.4]);     
-          const scaleYurb = d3.scaleLinear().domain([0, 1530]).range([figHeight- margin.bottom, 0]); 
+          const scaleYurb = d3.scaleLinear().domain([0, 1550]).range([figHeight- margin.bottom, 0]); 
         // const scaleYurb = d3.scaleLinear().domain([0, 140]).range([figHeight- margin.bottom, 0]); 
 
 
@@ -1129,7 +1144,25 @@ Promise.all([
 
         const yScaleHex = d3.scaleLinear()
                   .domain(d3.extent(hexes, d => d.y)).nice()
+                  // .range([figHeight - margin.top, margin.bottom])
+
                   .range([margin.bottom, figHeight - margin.top])
+
+        var featureCollection = { type:"FeatureCollection", features: hexes.map(function(d) {
+                    return {     
+                      "type": "Feature",
+                      "geometry": {
+                         "type": "Point",
+                         "coordinates": [d.x, d.y]
+                      },
+                      "properties": { "name":d.county }
+                    }
+                }) }
+
+        var projection = d3.geoMercator()
+        // .center([-96.5795, 39.828175])
+        // .scale(850)
+        .fitSize([figWidth-margin.right-margin.left, figHeight-margin.top-margin.bottom], featureCollection);
       
       
         const xAxis = g => g
@@ -1203,8 +1236,10 @@ Promise.all([
           // Draw the polygons around each hex's centre
           const circles = hexmap
               .append("circle")
-              .attr("cx", function(hex) {return xScaleHex(hex.x);})
-              .attr("cy", function(hex) {return yScaleHex(hex.y);})
+              .attr("cx", function(hex) {return projection([hex.x, hex.y])[0]})
+              .attr("cy", function(hex) {return projection([hex.x, hex.y])[1]})
+              // .attr("cx", function(hex) {return xScaleHex(hex.x);})
+              // .attr("cy", function(hex) {return yScaleHex(hex.y);})
             .attr("r", radius)
               .attr("stroke", "#fffae7")
               .attr("stroke-width", "0.5")
@@ -1230,7 +1265,8 @@ Promise.all([
                                         //     .attr("font-size", fontSize*1.5)
                                         //     .attr("font-weight", 900)
 
-                                        circles.filter(c=>c.fullName===d.fullName)
+                                        // circles.filter(c=>c.fullName===d.fullName)
+                                        circles.filter(c=>c.GEOID===d.GEOID)
                                             .attr("stroke-width", "1.5")
                                             .attr("r", radiusHover)
                                         
@@ -1339,8 +1375,10 @@ Promise.all([
             //   .attr("transform", function(hex) {
                   // 	return "translate(" + hex.x + "," + hex.y + ")";
                   // })
-              .attr("cx", function(hex) {return xScaleHex(hex.x);})
-              .attr("cy", function(hex) {return yScaleHex(hex.y);})
+              // .attr("cx", function(hex) {return xScaleHex(hex.x);})
+              // .attr("cy", function(hex) {return yScaleHex(hex.y);})
+              .attr("cx", function(hex) {return projection([hex.x, hex.y])[0]})
+              .attr("cy", function(hex) {return projection([hex.x, hex.y])[1]})
               .attr("r", radius)
               .attr("opacity", 1)
               .attr("fill", d => d.mobilityWork===null?"#ccc": 
